@@ -82,6 +82,7 @@
                     <td style="color:var(--text-muted);font-size:0.82rem;">{{ $exp->receipt_number ?? '-' }}</td>
                     <td style="text-align:right;font-weight:700;font-family:'SF Mono','Cascadia Code',monospace;color:var(--danger);">-₱{{ number_format($exp->amount, 2) }}</td>
                     <td>
+                        @if(Auth::user()->isAdmin())
                         <div style="display:flex;gap:6px;justify-content:flex-end;">
                             <a href="{{ route('expenses.edit', $exp) }}" class="btn btn-ghost btn-sm">Edit</a>
                             <form action="{{ route('expenses.destroy', $exp) }}" method="POST" onsubmit="return confirm('Delete this expense? The amount will be returned to the fund balance.')">
@@ -90,6 +91,8 @@
                                 <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger);">Delete</button>
                             </form>
                         </div>
+                        @else -
+                        @endif
                     </td>
                 </tr>
                 @endforeach

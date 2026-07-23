@@ -390,6 +390,11 @@
         <div class="topbar">
             <h2>@yield('page-title', 'Dashboard')</h2>
             <div class="topbar-right">
+                <span style="font-size:0.8rem;color:var(--text-secondary);font-weight:500;">{{ Auth::user()->name }} <span class="badge badge-{{ Auth::user()->isAdmin() ? 'active' : 'pending' }}" style="margin-left:4px;">{{ ucfirst(Auth::user()->role) }}</span></span>
+                <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                    @csrf
+                    <button type="submit" class="btn btn-secondary btn-sm">Logout</button>
+                </form>
                 <span class="topbar-time" id="clock"></span>
             </div>
         </div>
