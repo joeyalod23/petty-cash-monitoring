@@ -11,75 +11,77 @@ class PettyCashService
 {
     public function recordExpense(PettyCashFund $fund, array $data): array
     {
-        $expenseAmount = number_format((float) $data['amount'], 2, '.', '');
+        return DB::transaction(function () use ($fund, $data) {
+            $expenseAmount = number_format((float) $data['amount'], 2, '.', '');
 
-        $row = DB::selectOne(
-            'SELECT id, total_amount, current_balance, status FROM petty_cash_funds WHERE id = ?',
-            [$fund->id]
-        );
-
-        if (!$row) {
-            throw new \RuntimeException('Fund not found.');
-        }
-
-        if ((float) $row->current_balance < (float) $expenseAmount) {
-            throw new \RuntimeException('Insufficient Petty Cash Balance');
-        }
-
-        $newBalance = number_format((float) $row->current_balance - (float) $expenseAmount, 2, '.', '');
-        $threshold = number_format((float) $row->total_amount * 0.30, 2, '.', '');
-        $totalExpenses = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
-        $shouldTrigger = (float) $totalExpenses >= (float) $threshold;
-
-        $newStatus = $row->status;
-        if ($shouldTrigger && $row->status !== 'replenishment_pending') {
-            $newStatus = 'low_balance';
-        }
-
-        DB::update(
-            'UPDATE petty_cash_funds SET current_balance = ?, status = ?, updated_at = NOW() WHERE id = ?',
-            [$newBalance, $newStatus, $row->id]
-        );
-
-        $expenseId = DB::table('expenses')->insertGetId([
-            'fund_id' => $row->id,
-            'payee' => $data['payee'],
-            'category' => $data['category'],
-            'amount' => $expenseAmount,
-            'receipt_number' => $data['receipt_number'] ?: null,
-            'expense_date' => $data['expense_date'],
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        if ($shouldTrigger) {
-            $existingPending = DB::selectOne(
-                'SELECT id FROM replenishment_requests WHERE fund_id = ? AND status = ?',
-                [$row->id, 'pending']
+            $row = DB::selectOne(
+                'SELECT id, total_amount, current_balance, status FROM petty_cash_funds WHERE id = ? FOR UPDATE',
+                [$fund->id]
             );
 
-            if (!$existingPending) {
-                $replenishAmount = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
-
-                DB::insert(
-                    'INSERT INTO replenishment_requests (fund_id, requested_amount, status, triggered_by, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())',
-                    [
-                        $row->id,
-                        $replenishAmount,
-                        'pending',
-                        'System Auto-Trigger (30% Total Expense Alert - To Liquidate & Replenish)',
-                    ]
-                );
+            if (!$row) {
+                throw new \RuntimeException('Fund not found.');
             }
-        }
 
-        return [
-            'expense' => Expense::find($expenseId),
-            'current_balance' => (float) $newBalance,
-            'alert_triggered' => $shouldTrigger,
-            'threshold' => (float) $threshold,
-            'total_expenses' => (float) $totalExpenses,
-        ];
+            if ((float) $row->current_balance < (float) $expenseAmount) {
+                throw new \RuntimeException('Insufficient Petty Cash Balance');
+            }
+
+            $newBalance = number_format((float) $row->current_balance - (float) $expenseAmount, 2, '.', '');
+            $threshold = number_format((float) $row->total_amount * 0.30, 2, '.', '');
+            $totalExpenses = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
+            $shouldTrigger = (float) $totalExpenses >= (float) $threshold;
+
+            $newStatus = $row->status;
+            if ($shouldTrigger && $row->status !== 'replenishment_pending') {
+                $newStatus = 'low_balance';
+            }
+
+            DB::update(
+                'UPDATE petty_cash_funds SET current_balance = ?, status = ?, updated_at = NOW() WHERE id = ?',
+                [$newBalance, $newStatus, $row->id]
+            );
+
+            $expenseId = DB::table('expenses')->insertGetId([
+                'fund_id' => $row->id,
+                'payee' => $data['payee'],
+                'category' => $data['category'],
+                'amount' => $expenseAmount,
+                'receipt_number' => $data['receipt_number'] ?: null,
+                'expense_date' => $data['expense_date'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            if ($shouldTrigger) {
+                $existingPending = DB::selectOne(
+                    'SELECT id FROM replenishment_requests WHERE fund_id = ? AND status = ?',
+                    [$row->id, 'pending']
+                );
+
+                if (!$existingPending) {
+                    $replenishAmount = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
+
+                    DB::insert(
+                        'INSERT INTO replenishment_requests (fund_id, requested_amount, status, triggered_by, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())',
+                        [
+                            $row->id,
+                            $replenishAmount,
+                            'pending',
+                            'System Auto-Trigger (30% Total Expense Alert - To Liquidate & Replenish)',
+                        ]
+                    );
+                }
+            }
+
+            return [
+                'expense' => Expense::find($expenseId),
+                'current_balance' => (float) $newBalance,
+                'alert_triggered' => $shouldTrigger,
+                'threshold' => (float) $threshold,
+                'total_expenses' => (float) $totalExpenses,
+            ];
+        });
     }
 
     public function createFund(float $totalAmount): PettyCashFund
@@ -105,87 +107,91 @@ class PettyCashService
 
     public function updateExpense(Expense $expense, array $data): void
     {
-        $oldAmount = (float) $expense->amount;
-        $newAmount = (float) $data['amount'];
-        $diff = $newAmount - $oldAmount;
+        DB::transaction(function () use ($expense, $data) {
+            $oldAmount = (float) $expense->amount;
+            $newAmount = (float) $data['amount'];
+            $diff = $newAmount - $oldAmount;
 
-        DB::update(
-            'UPDATE expenses SET payee = ?, category = ?, amount = ?, receipt_number = ?, expense_date = ?, updated_at = NOW() WHERE id = ?',
-            [
-                $data['payee'],
-                $data['category'],
-                number_format($newAmount, 2, '.', ''),
-                $data['receipt_number'] ?: null,
-                $data['expense_date'],
-                $expense->id,
-            ]
-        );
-
-        if ($diff != 0) {
-            $row = DB::selectOne(
-                'SELECT id, total_amount, current_balance, status FROM petty_cash_funds WHERE id = ?',
-                [$expense->fund_id]
+            DB::update(
+                'UPDATE expenses SET payee = ?, category = ?, amount = ?, receipt_number = ?, expense_date = ?, updated_at = NOW() WHERE id = ?',
+                [
+                    $data['payee'],
+                    $data['category'],
+                    number_format($newAmount, 2, '.', ''),
+                    $data['receipt_number'] ?: null,
+                    $data['expense_date'],
+                    $expense->id,
+                ]
             );
 
-            if ($row) {
-                $newBalance = number_format((float) $row->current_balance - $diff, 2, '.', '');
-                $threshold = number_format((float) $row->total_amount * 0.30, 2, '.', '');
-                $totalExpenses = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
-                $shouldTrigger = (float) $totalExpenses >= (float) $threshold;
-
-                $newStatus = $row->status;
-                if ($shouldTrigger && $row->status !== 'replenishment_pending') {
-                    $newStatus = 'low_balance';
-                }
-
-                DB::update(
-                    'UPDATE petty_cash_funds SET current_balance = ?, status = ?, updated_at = NOW() WHERE id = ?',
-                    [$newBalance, $newStatus, $row->id]
+            if ($diff != 0) {
+                $row = DB::selectOne(
+                    'SELECT id, total_amount, current_balance, status FROM petty_cash_funds WHERE id = ? FOR UPDATE',
+                    [$expense->fund_id]
                 );
 
-                if ($shouldTrigger) {
-                    $existingPending = DB::selectOne(
-                        'SELECT id FROM replenishment_requests WHERE fund_id = ? AND status = ?',
-                        [$row->id, 'pending']
+                if ($row) {
+                    $newBalance = number_format((float) $row->current_balance - $diff, 2, '.', '');
+                    $threshold = number_format((float) $row->total_amount * 0.30, 2, '.', '');
+                    $totalExpenses = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
+                    $shouldTrigger = (float) $totalExpenses >= (float) $threshold;
+
+                    $newStatus = $row->status;
+                    if ($shouldTrigger && $row->status !== 'replenishment_pending') {
+                        $newStatus = 'low_balance';
+                    }
+
+                    DB::update(
+                        'UPDATE petty_cash_funds SET current_balance = ?, status = ?, updated_at = NOW() WHERE id = ?',
+                        [$newBalance, $newStatus, $row->id]
                     );
 
-                    if (!$existingPending) {
-                        $replenishAmount = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
-
-                        DB::insert(
-                            'INSERT INTO replenishment_requests (fund_id, requested_amount, status, triggered_by, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())',
-                            [
-                                $row->id,
-                                $replenishAmount,
-                                'pending',
-                                'System Auto-Trigger (30% Total Expense Alert - To Liquidate & Replenish)',
-                            ]
+                    if ($shouldTrigger) {
+                        $existingPending = DB::selectOne(
+                            'SELECT id FROM replenishment_requests WHERE fund_id = ? AND status = ?',
+                            [$row->id, 'pending']
                         );
+
+                        if (!$existingPending) {
+                            $replenishAmount = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
+
+                            DB::insert(
+                                'INSERT INTO replenishment_requests (fund_id, requested_amount, status, triggered_by, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())',
+                                [
+                                    $row->id,
+                                    $replenishAmount,
+                                    'pending',
+                                    'System Auto-Trigger (30% Total Expense Alert - To Liquidate & Replenish)',
+                                ]
+                            );
+                        }
                     }
                 }
             }
-        }
+        });
     }
 
     public function deleteExpense(Expense $expense): void
     {
-        $amount = (float) $expense->amount;
+        DB::transaction(function () use ($expense) {
+            $amount = (float) $expense->amount;
 
-        DB::delete('DELETE FROM expenses WHERE id = ?', [$expense->id]);
+            DB::delete('DELETE FROM expenses WHERE id = ?', [$expense->id]);
 
-        $row = DB::selectOne(
-            'SELECT id, total_amount, current_balance, status FROM petty_cash_funds WHERE id = ?',
-            [$expense->fund_id]
-        );
-
-        if ($row) {
-            $newBalance = number_format((float) $row->current_balance + $amount, 2, '.', '');
-
-            DB::update(
-                'UPDATE petty_cash_funds SET current_balance = ?, updated_at = NOW() WHERE id = ?',
-                [$newBalance, $row->id]
+            $row = DB::selectOne(
+                'SELECT id, total_amount, current_balance, status FROM petty_cash_funds WHERE id = ? FOR UPDATE',
+                [$expense->fund_id]
             );
-        }
+
+            if ($row) {
+                $newBalance = number_format((float) $row->current_balance + $amount, 2, '.', '');
+
+                DB::update(
+                    'UPDATE petty_cash_funds SET current_balance = ?, updated_at = NOW() WHERE id = ?',
+                    [$newBalance, $row->id]
+                );
+            }
+        });
     }
 
     public function createReplenishment(int $fundId, float $amount): void

@@ -8,6 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::dropIfExists('replenishment_items');
+        Schema::dropIfExists('replenishment_reports');
+
         Schema::create('replenishment_reports', function (Blueprint $table) {
             $table->id();
             $table->string('project_name', 255);
