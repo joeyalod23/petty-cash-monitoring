@@ -77,7 +77,7 @@ class PettyCashController extends Controller
 
             $message = 'Expense logged successfully.';
             if ($result['alert_triggered']) {
-                $message .= ' Balance is below 30% threshold - replenishment request auto-generated.';
+                $message .= ' Total expenses reached 30% of fund - marked for liquidation & replenishment request auto-generated.';
             }
 
             return redirect()->route('fund.expenses', $fund)

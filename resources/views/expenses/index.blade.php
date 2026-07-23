@@ -1,7 +1,8 @@
 @extends('layouts.app')
 @php
-    $pct = $fund->total_amount > 0 ? ($fund->current_balance / $fund->total_amount) * 100 : 0;
-    $fillClass = $pct > 50 ? 'green' : ($pct > 30 ? 'yellow' : 'red');
+    $totalExpenses = $fund->total_amount - $fund->current_balance;
+    $expensePct = $fund->total_amount > 0 ? ($totalExpenses / $fund->total_amount) * 100 : 0;
+    $fillClass = $expensePct > 50 ? 'red' : ($expensePct > 30 ? 'yellow' : 'green');
 @endphp
 
 @section('title', 'Expenses - Fund #' . $fund->id)
@@ -39,10 +40,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
         </div>
         <div class="stat-info">
-            <div class="label">Threshold</div>
+            <div class="label">30% Expense Threshold</div>
             <div class="value">₱{{ number_format($fund->total_amount * 0.30, 2) }}</div>
-            <div class="sub" style="color:{{ $fund->current_balance <= ($fund->total_amount * 0.30) ? 'var(--danger)' : 'var(--text-muted)' }}; font-weight:{{ $fund->current_balance <= ($fund->total_amount * 0.30) ? '600' : '400' }};">
-                {{ $fund->current_balance <= ($fund->total_amount * 0.30) ? 'ALERT TRIGGERED' : 'Above threshold' }}
+            <div class="sub" style="color:{{ $totalExpenses >= ($fund->total_amount * 0.30) ? 'var(--danger)' : 'var(--text-muted)' }}; font-weight:{{ $totalExpenses >= ($fund->total_amount * 0.30) ? '600' : '400' }};">
+                {{ $totalExpenses >= ($fund->total_amount * 0.30) ? 'LIQUIDATE & REPLENISH' : 'Above threshold' }}
             </div>
         </div>
     </div>

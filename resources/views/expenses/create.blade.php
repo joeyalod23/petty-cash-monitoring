@@ -1,7 +1,8 @@
 @extends('layouts.app')
 @php
-    $pct = $fund->total_amount > 0 ? ($fund->current_balance / $fund->total_amount) * 100 : 0;
-    $fillClass = $pct > 50 ? 'green' : ($pct > 30 ? 'yellow' : 'red');
+    $totalExpenses = $fund->total_amount - $fund->current_balance;
+    $expensePct = $fund->total_amount > 0 ? ($totalExpenses / $fund->total_amount) * 100 : 0;
+    $fillClass = $expensePct > 50 ? 'red' : ($expensePct > 30 ? 'yellow' : 'green');
 @endphp
 
 @section('title', 'Log Expense - Fund #' . $fund->id)
@@ -85,11 +86,11 @@
 
                 <div style="margin-bottom:16px;">
                     <div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:4px;">
-                        <span style="color:var(--text-secondary);font-weight:500;">Utilization</span>
-                        <span style="font-weight:600;">{{ number_format($pct, 1) }}%</span>
+                        <span style="color:var(--text-secondary);font-weight:500;">Expense Utilization</span>
+                        <span style="font-weight:600;">{{ number_format($expensePct, 1) }}%</span>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill {{ $fillClass }}" style="width:{{ min($pct, 100) }}%"></div>
+                        <div class="progress-fill {{ $fillClass }}" style="width:{{ min($expensePct, 100) }}%"></div>
                     </div>
                 </div>
 
@@ -100,12 +101,17 @@
                     </div>
                     <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
                         <span style="font-size:0.8rem;color:var(--text-secondary);">Spent</span>
-                        <span style="font-size:0.8rem;font-weight:600;" class="text-mono">₱{{ number_format($fund->total_amount - $fund->current_balance, 2) }}</span>
+                        <span style="font-size:0.8rem;font-weight:600;" class="text-mono">₱{{ number_format($totalExpenses, 2) }}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;">
-                        <span style="font-size:0.8rem;color:var(--text-secondary);">30% Threshold</span>
+                        <span style="font-size:0.8rem;color:var(--text-secondary);">30% Expense Threshold</span>
                         <span style="font-size:0.8rem;font-weight:600;" class="text-mono">₱{{ number_format($fund->total_amount * 0.30, 2) }}</span>
                     </div>
+                    @if($totalExpenses >= $fund->total_amount * 0.30)
+                    <div style="margin-top:10px;padding:8px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:0.78rem;color:var(--danger);font-weight:600;text-align:center;">
+                        Liquidate & Replenish
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>

@@ -28,7 +28,8 @@ class PettyCashService
 
         $newBalance = number_format((float) $row->current_balance - (float) $expenseAmount, 2, '.', '');
         $threshold = number_format((float) $row->total_amount * 0.30, 2, '.', '');
-        $shouldTrigger = (float) $newBalance <= (float) $threshold;
+        $totalExpenses = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
+        $shouldTrigger = (float) $totalExpenses >= (float) $threshold;
 
         $newStatus = $row->status;
         if ($shouldTrigger && $row->status !== 'replenishment_pending') {
@@ -52,17 +53,24 @@ class PettyCashService
         ]);
 
         if ($shouldTrigger) {
-            $replenishAmount = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
-
-            DB::insert(
-                'INSERT INTO replenishment_requests (fund_id, requested_amount, status, triggered_by, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())',
-                [
-                    $row->id,
-                    $replenishAmount,
-                    'pending',
-                    'System Auto-Trigger (30% Balance Alert)',
-                ]
+            $existingPending = DB::selectOne(
+                'SELECT id FROM replenishment_requests WHERE fund_id = ? AND status = ?',
+                [$row->id, 'pending']
             );
+
+            if (!$existingPending) {
+                $replenishAmount = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
+
+                DB::insert(
+                    'INSERT INTO replenishment_requests (fund_id, requested_amount, status, triggered_by, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())',
+                    [
+                        $row->id,
+                        $replenishAmount,
+                        'pending',
+                        'System Auto-Trigger (30% Total Expense Alert - To Liquidate & Replenish)',
+                    ]
+                );
+            }
         }
 
         return [
@@ -70,6 +78,7 @@ class PettyCashService
             'current_balance' => (float) $newBalance,
             'alert_triggered' => $shouldTrigger,
             'threshold' => (float) $threshold,
+            'total_expenses' => (float) $totalExpenses,
         ];
     }
 
@@ -121,7 +130,8 @@ class PettyCashService
             if ($row) {
                 $newBalance = number_format((float) $row->current_balance - $diff, 2, '.', '');
                 $threshold = number_format((float) $row->total_amount * 0.30, 2, '.', '');
-                $shouldTrigger = (float) $newBalance <= (float) $threshold;
+                $totalExpenses = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
+                $shouldTrigger = (float) $totalExpenses >= (float) $threshold;
 
                 $newStatus = $row->status;
                 if ($shouldTrigger && $row->status !== 'replenishment_pending') {
@@ -132,6 +142,27 @@ class PettyCashService
                     'UPDATE petty_cash_funds SET current_balance = ?, status = ?, updated_at = NOW() WHERE id = ?',
                     [$newBalance, $newStatus, $row->id]
                 );
+
+                if ($shouldTrigger) {
+                    $existingPending = DB::selectOne(
+                        'SELECT id FROM replenishment_requests WHERE fund_id = ? AND status = ?',
+                        [$row->id, 'pending']
+                    );
+
+                    if (!$existingPending) {
+                        $replenishAmount = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
+
+                        DB::insert(
+                            'INSERT INTO replenishment_requests (fund_id, requested_amount, status, triggered_by, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())',
+                            [
+                                $row->id,
+                                $replenishAmount,
+                                'pending',
+                                'System Auto-Trigger (30% Total Expense Alert - To Liquidate & Replenish)',
+                            ]
+                        );
+                    }
+                }
             }
         }
     }

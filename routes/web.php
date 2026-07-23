@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PettyCashController;
+use App\Http\Controllers\ReplenishmentReportController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
@@ -37,6 +38,17 @@ Route::middleware('auth')->group(function () {
         Route::post('/replenishments/{request}/approve', [PettyCashController::class, 'approveReplenishment'])->name('replenishments.approve');
         Route::post('/replenishments/{request}/disburse', [PettyCashController::class, 'disburseReplenishment'])->name('replenishments.disburse');
         Route::post('/replenishments/{request}/reject', [PettyCashController::class, 'rejectReplenishment'])->name('replenishments.reject');
+    });
+
+    Route::get('/reports', [ReplenishmentReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/{report}', [ReplenishmentReportController::class, 'show'])->name('reports.show');
+
+    Route::middleware('admin')->group(function () {
+        Route::get('/reports/create', [ReplenishmentReportController::class, 'create'])->name('reports.create');
+        Route::post('/reports', [ReplenishmentReportController::class, 'store'])->name('reports.store');
+        Route::get('/reports/{report}/edit', [ReplenishmentReportController::class, 'edit'])->name('reports.edit');
+        Route::put('/reports/{report}', [ReplenishmentReportController::class, 'update'])->name('reports.update');
+        Route::delete('/reports/{report}', [ReplenishmentReportController::class, 'destroy'])->name('reports.destroy');
     });
 });
 

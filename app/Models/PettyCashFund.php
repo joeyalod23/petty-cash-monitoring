@@ -39,7 +39,13 @@ class PettyCashFund extends Model
 
     public function isBelowThreshold(): bool
     {
-        return (float) $this->current_balance <= $this->threshold;
+        $totalExpenses = (float) $this->total_amount - (float) $this->current_balance;
+        return $totalExpenses >= $this->threshold;
+    }
+
+    public function getTotalExpensesAttribute(): float
+    {
+        return (float) $this->total_amount - (float) $this->current_balance;
     }
 
     public function getReplenishAmountAttribute(): float

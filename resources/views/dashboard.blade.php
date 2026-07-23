@@ -129,11 +129,12 @@
             <tbody>
                 @foreach($funds as $fund)
                 @php
-                    $pct = $fund->total_amount > 0 ? ($fund->current_balance / $fund->total_amount) * 100 : 0;
-                    $fillClass = $pct > 50 ? 'green' : ($pct > 30 ? 'yellow' : 'red');
+                    $totalFundExpenses = $fund->total_amount - $fund->current_balance;
+                    $expensePct = $fund->total_amount > 0 ? ($totalFundExpenses / $fund->total_amount) * 100 : 0;
+                    $fillClass = $expensePct > 50 ? 'red' : ($expensePct > 30 ? 'yellow' : 'green');
                     $statusLabel = match($fund->status) {
                         'active' => 'Active',
-                        'low_balance' => 'Low Balance',
+                        'low_balance' => 'To Liquidate',
                         'replenishment_pending' => 'Pending',
                         default => $fund->status,
                     };
@@ -146,11 +147,11 @@
                     <td class="text-mono" style="font-weight:600;">₱{{ number_format($fund->current_balance, 2) }}</td>
                     <td>
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-                            <span style="font-size:0.78rem;font-weight:600;color:var(--text-secondary);">{{ number_format($pct, 1) }}%</span>
-                            <span style="font-size:0.72rem;color:var(--text-muted);">30% threshold</span>
+                            <span style="font-size:0.78rem;font-weight:600;color:var(--text-secondary);">{{ number_format($expensePct, 1) }}%</span>
+                            <span style="font-size:0.72rem;color:var(--text-muted);">30% expense threshold</span>
                         </div>
                         <div class="progress-bar">
-                            <div class="progress-fill {{ $fillClass }}" style="width:{{ min($pct, 100) }}%"></div>
+                            <div class="progress-fill {{ $fillClass }}" style="width:{{ min($expensePct, 100) }}%"></div>
                         </div>
                     </td>
                     <td><span class="badge badge-{{ $fund->status }}">{{ $statusLabel }}</span></td>
