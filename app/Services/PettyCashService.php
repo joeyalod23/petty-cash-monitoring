@@ -40,17 +40,16 @@ class PettyCashService
             [$newBalance, $newStatus, $row->id]
         );
 
-        $expenseId = DB::insertGetId(
-            'INSERT INTO expenses (fund_id, payee, category, amount, receipt_number, expense_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())',
-            [
-                $row->id,
-                $data['payee'],
-                $data['category'],
-                $expenseAmount,
-                $data['receipt_number'] ?: null,
-                $data['expense_date'],
-            ]
-        );
+        $expenseId = DB::table('expenses')->insertGetId([
+            'fund_id' => $row->id,
+            'payee' => $data['payee'],
+            'category' => $data['category'],
+            'amount' => $expenseAmount,
+            'receipt_number' => $data['receipt_number'] ?: null,
+            'expense_date' => $data['expense_date'],
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         if ($shouldTrigger) {
             $replenishAmount = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
