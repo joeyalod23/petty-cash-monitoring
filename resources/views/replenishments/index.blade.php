@@ -57,6 +57,10 @@
 <div class="card">
     <div class="card-header">
         <h3>All Requests</h3>
+        <a href="{{ route('replenishments.create') }}" class="btn btn-primary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Request
+        </a>
     </div>
     @if($requests->isEmpty())
         <div class="empty-state">
@@ -90,28 +94,32 @@
                     <td style="color:var(--text-secondary);font-size:0.82rem;">{{ $req->triggered_by }}</td>
                     <td style="color:var(--text-secondary);">{{ $req->created_at->format('M d, Y H:i') }}</td>
                     <td>
-                        @if($req->status === 'pending')
-                            <div style="display:flex;gap:6px;">
-                                <form action="{{ route('replenishments.approve', $req) }}" method="POST">
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                            @if($req->status === 'pending')
+                                <form action="{{ route('replenishments.approve', $req) }}" method="POST" style="display:inline;">
                                     @csrf
                                     <button type="submit" class="btn btn-success btn-sm">Approve</button>
                                 </form>
-                                <form action="{{ route('replenishments.reject', $req) }}" method="POST">
+                                <form action="{{ route('replenishments.reject', $req) }}" method="POST" style="display:inline;">
                                     @csrf
                                     <button type="submit" class="btn btn-danger btn-sm">Reject</button>
                                 </form>
-                            </div>
-                        @elseif($req->status === 'approved')
-                            <form action="{{ route('replenishments.disburse', $req) }}" method="POST">
+                            @elseif($req->status === 'approved')
+                                <form action="{{ route('replenishments.disburse', $req) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                                        Disburse
+                                    </button>
+                                </form>
+                            @endif
+                            <a href="{{ route('replenishments.edit', $req) }}" class="btn btn-ghost btn-sm">Edit</a>
+                            <form action="{{ route('replenishments.destroy', $req) }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this replenishment request?')">
                                 @csrf
-                                <button type="submit" class="btn btn-primary btn-sm">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                                    Disburse
-                                </button>
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger);">Delete</button>
                             </form>
-                        @else
-                            <span style="color:var(--text-muted);font-size:0.82rem;">-</span>
-                        @endif
+                        </div>
                     </td>
                 </tr>
                 @endforeach

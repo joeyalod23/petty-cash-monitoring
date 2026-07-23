@@ -153,12 +153,18 @@
                     </td>
                     <td><span class="badge badge-{{ $fund->status }}">{{ $statusLabel }}</span></td>
                     <td>
-                        <div style="display:flex;gap:6px;">
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
                             <a href="{{ route('fund.expenses.create', $fund) }}" class="btn btn-primary btn-sm">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                                 Expense
                             </a>
                             <a href="{{ route('fund.expenses', $fund) }}" class="btn btn-secondary btn-sm">History</a>
+                            <a href="{{ route('funds.edit', $fund) }}" class="btn btn-ghost btn-sm">Edit</a>
+                            <form action="{{ route('funds.destroy', $fund) }}" method="POST" onsubmit="return confirm('Delete this fund and all its expenses?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger);">Delete</button>
+                            </form>
                         </div>
                     </td>
                 </tr>

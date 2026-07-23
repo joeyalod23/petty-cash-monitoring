@@ -70,6 +70,7 @@
                     <th>Category</th>
                     <th>Receipt #</th>
                     <th style="text-align:right;">Amount</th>
+                    <th style="text-align:right;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -80,6 +81,16 @@
                     <td><span style="font-size:0.78rem;background:var(--bg);padding:3px 10px;border-radius:6px;font-weight:500;color:var(--text-secondary);">{{ $exp->category }}</span></td>
                     <td style="color:var(--text-muted);font-size:0.82rem;">{{ $exp->receipt_number ?? '-' }}</td>
                     <td style="text-align:right;font-weight:700;font-family:'SF Mono','Cascadia Code',monospace;color:var(--danger);">-₱{{ number_format($exp->amount, 2) }}</td>
+                    <td>
+                        <div style="display:flex;gap:6px;justify-content:flex-end;">
+                            <a href="{{ route('expenses.edit', $exp) }}" class="btn btn-ghost btn-sm">Edit</a>
+                            <form action="{{ route('expenses.destroy', $exp) }}" method="POST" onsubmit="return confirm('Delete this expense? The amount will be returned to the fund balance.')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger);">Delete</button>
+                            </form>
+                        </div>
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
