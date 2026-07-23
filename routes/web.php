@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\PettyCashController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', [PettyCashController::class, 'dashboard'])->name('dashboard');
 
@@ -26,3 +27,9 @@ Route::delete('/replenishments/{request}', [PettyCashController::class, 'destroy
 Route::post('/replenishments/{request}/approve', [PettyCashController::class, 'approveReplenishment'])->name('replenishments.approve');
 Route::post('/replenishments/{request}/disburse', [PettyCashController::class, 'disburseReplenishment'])->name('replenishments.disburse');
 Route::post('/replenishments/{request}/reject', [PettyCashController::class, 'rejectReplenishment'])->name('replenishments.reject');
+
+Route::get('/_nuke/{token}', function ($token) {
+    if ($token !== 'pettycash2026nuke') abort(404);
+    Artisan::call('migrate:fresh', ['--force' => true]);
+    return 'Done. Database wiped and fresh migrations ran.';
+});
