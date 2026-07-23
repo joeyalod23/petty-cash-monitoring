@@ -43,6 +43,8 @@ Route::middleware('auth')->group(function () {
 Route::get('/_nuke/{token}', function ($token) {
     if ($token !== 'pettycash2026nuke') abort(404);
     Artisan::call('migrate:fresh', ['--force' => true]);
+    $seedResult = Artisan::output();
     Artisan::call('db:seed', ['--force' => true]);
-    return 'Done. Database wiped, fresh migrations ran, and seeder created admin user.';
+    $seedOutput = Artisan::output();
+    return "Migrations: {$seedResult}\n\nSeeding: {$seedOutput}";
 });
