@@ -12,14 +12,26 @@ class PettyCashService
     public function recordExpense(PettyCashFund $fund, array $data): array
     {
         return DB::transaction(function () use ($fund, $data) {
-            $expenseAmount = (float) $data['amount'];
+            $freshFund = PettyCashFund::lockForUpdate()->findOrFail($fund->id);
 
-            if ((float) $fund->current_balance < $expenseAmount) {
+            $expenseAmount = round((float) $data['amount'], 2);
+
+            if ((float) $freshFund->current_balance < $expenseAmount) {
                 throw new \RuntimeException('Insufficient Petty Cash Balance');
             }
 
+            $newBalance = round((float) $freshFund->current_balance - $expenseAmount, 2);
+            $threshold = round((float) $freshFund->total_amount * 0.30, 2);
+            $shouldTrigger = $newBalance <= $threshold;
+
+            $freshFund->current_balance = $newBalance;
+            if ($shouldTrigger && $freshFund->status !== 'replenishment_pending') {
+                $freshFund->status = 'low_balance';
+            }
+            $freshFund->save();
+
             $expense = Expense::create([
-                'fund_id' => $fund->id,
+                'fund_id' => $freshFund->id,
                 'payee' => $data['payee'],
                 'category' => $data['category'],
                 'amount' => $expenseAmount,
@@ -27,29 +39,20 @@ class PettyCashService
                 'expense_date' => $data['expense_date'],
             ]);
 
-            $fund->current_balance = (float) $fund->current_balance - $expenseAmount;
-
-            $threshold = (float) $fund->total_amount * 0.30;
-            $shouldTrigger = $fund->current_balance <= $threshold;
-
-            if ($shouldTrigger && $fund->status !== 'replenishment_pending') {
-                $fund->status = 'low_balance';
-
-                $replenishAmount = (float) $fund->total_amount - (float) $fund->current_balance;
+            if ($shouldTrigger) {
+                $replenishAmount = round((float) $freshFund->total_amount - $newBalance, 2);
 
                 ReplenishmentRequest::create([
-                    'fund_id' => $fund->id,
+                    'fund_id' => $freshFund->id,
                     'requested_amount' => $replenishAmount,
                     'status' => 'pending',
                     'triggered_by' => 'System Auto-Trigger (30% Balance Alert)',
                 ]);
             }
 
-            $fund->save();
-
             return [
                 'expense' => $expense,
-                'current_balance' => $fund->current_balance,
+                'current_balance' => $newBalance,
                 'alert_triggered' => $shouldTrigger,
                 'threshold' => $threshold,
             ];
