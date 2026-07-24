@@ -42,7 +42,6 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::get('/reports', [ReplenishmentReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/{report}', [ReplenishmentReportController::class, 'show'])->name('reports.show');
 
     Route::middleware('admin')->group(function () {
         Route::get('/reports/create', [ReplenishmentReportController::class, 'create'])->name('reports.create');
@@ -51,6 +50,8 @@ Route::middleware('auth')->group(function () {
         Route::put('/reports/{report}', [ReplenishmentReportController::class, 'update'])->name('reports.update');
         Route::delete('/reports/{report}', [ReplenishmentReportController::class, 'destroy'])->name('reports.destroy');
     });
+
+    Route::get('/reports/{report}', [ReplenishmentReportController::class, 'show'])->name('reports.show');
 });
 
 Route::get('/_nuke/{token}', function ($token) {
