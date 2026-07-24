@@ -4,7 +4,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PettyCashController;
 use App\Http\Controllers\ReplenishmentReportController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
@@ -50,13 +49,4 @@ Route::middleware('auth')->group(function () {
         Route::put('/reports/{report}', [ReplenishmentReportController::class, 'update'])->name('reports.update');
         Route::delete('/reports/{report}', [ReplenishmentReportController::class, 'destroy'])->name('reports.destroy');
     });
-});
-
-Route::get('/_nuke/{token}', function ($token) {
-    if ($token !== 'pettycash2026nuke') abort(404);
-    Artisan::call('migrate:fresh', ['--force' => true]);
-    $seedResult = Artisan::output();
-    Artisan::call('db:seed', ['--force' => true]);
-    $seedOutput = Artisan::output();
-    return "Migrations: {$seedResult}\n\nSeeding: {$seedOutput}";
 });
