@@ -9,31 +9,46 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Artisan::command('db:reset-and-seed', function () {
-    $this->info('Purging DB connections...');
+function freshConnection(): void
+{
     DB::purge();
     DB::reconnect();
+    try { DB::connection()->getPdo()->exec('ROLLBACK'); } catch (\Exception $e) {}
+}
+
+function dropIfExistsSafe(string $table): bool
+{
+    try {
+        return Schema::dropIfExists($table);
+    } catch (\Exception $e) {
+        freshConnection();
+        try { return Schema::dropIfExists($table); } catch (\Exception $e2) { return false; }
+    }
+}
+
+Artisan::command('db:reset-and-seed', function () {
+    $this->info('Establishing fresh DB connection...');
+    freshConnection();
+
+    $tables = [
+        'replenishment_items', 'replenishment_reports', 'expenses',
+        'replenishment_requests', 'petty_cash_funds',
+        'sessions', 'cache_locks', 'cache',
+        'failed_jobs', 'job_batches', 'jobs',
+        'password_reset_tokens', 'users', 'migrations',
+    ];
 
     $this->info('Dropping all tables...');
-    Schema::dropIfExists('replenishment_items');
-    Schema::dropIfExists('replenishment_reports');
-    Schema::dropIfExists('expenses');
-    Schema::dropIfExists('replenishment_requests');
-    Schema::dropIfExists('petty_cash_funds');
-    Schema::dropIfExists('sessions');
-    Schema::dropIfExists('cache_locks');
-    Schema::dropIfExists('cache');
-    Schema::dropIfExists('failed_jobs');
-    Schema::dropIfExists('job_batches');
-    Schema::dropIfExists('jobs');
-    Schema::dropIfExists('password_reset_tokens');
-    Schema::dropIfExists('users');
-    Schema::dropIfExists('migrations');
+    foreach ($tables as $table) {
+        dropIfExistsSafe($table);
+    }
 
     $this->info('Waiting for connection pool to refresh...');
-    DB::purge();
-    sleep(3);
-    DB::reconnect();
+    freshConnection();
+    sleep(5);
+
+    $this->info('Reconnecting with clean connection...');
+    freshConnection();
 
     $this->info('Running migrations...');
     Artisan::call('migrate', ['--force' => true]);
