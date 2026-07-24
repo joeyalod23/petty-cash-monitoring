@@ -22,5 +22,7 @@ class DatabaseSeeder extends Seeder
             'password' => 'password',
             'role' => 'user',
         ]);
+
+        $this->call(PettyCashSeeder::class);
     }
 }
