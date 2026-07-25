@@ -46,6 +46,7 @@ class PettyCashService
                 'fund_id' => $row->id,
                 'payee' => $data['payee'],
                 'category' => $data['category'],
+                'subcategory' => $data['subcategory'] ?? null,
                 'amount' => $expenseAmount,
                 'receipt_number' => $data['receipt_number'] ?: null,
                 'expense_date' => $data['expense_date'],
@@ -113,10 +114,11 @@ class PettyCashService
             $diff = $newAmount - $oldAmount;
 
             DB::update(
-                'UPDATE expenses SET payee = ?, category = ?, amount = ?, receipt_number = ?, expense_date = ?, updated_at = NOW() WHERE id = ?',
+                'UPDATE expenses SET payee = ?, category = ?, subcategory = ?, amount = ?, receipt_number = ?, expense_date = ?, updated_at = NOW() WHERE id = ?',
                 [
                     $data['payee'],
                     $data['category'],
+                    $data['subcategory'] ?? null,
                     number_format($newAmount, 2, '.', ''),
                     $data['receipt_number'] ?: null,
                     $data['expense_date'],

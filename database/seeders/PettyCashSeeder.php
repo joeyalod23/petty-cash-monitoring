@@ -17,11 +17,11 @@ class PettyCashSeeder extends Seeder
         ]);
 
         $expenses = [
-            ['payee' => 'National Book Store', 'category' => 'Supplies', 'amount' => 350.00, 'receipt_number' => 'REC-001', 'expense_date' => '2026-07-15'],
-            ['payee' => 'Grab Philippines', 'category' => 'Transportation', 'amount' => 480.00, 'receipt_number' => 'REC-002', 'expense_date' => '2026-07-16'],
-            ['payee' => 'Jollibee', 'category' => 'Meals', 'amount' => 1250.00, 'receipt_number' => 'REC-003', 'expense_date' => '2026-07-17'],
-            ['payee' => 'Globe Telecom', 'category' => 'Communication', 'amount' => 500.00, 'receipt_number' => 'REC-004', 'expense_date' => '2026-07-18'],
-            ['payee' => 'SM Supplies', 'category' => 'Office', 'amount' => 720.00, 'receipt_number' => 'REC-005', 'expense_date' => '2026-07-19'],
+            ['payee' => 'National Book Store', 'category' => 'Supplies', 'subcategory' => 'Bond paper and pens for printing documents', 'amount' => 350.00, 'receipt_number' => 'REC-001', 'expense_date' => '2026-07-15'],
+            ['payee' => 'Grab Philippines', 'category' => 'Transportation', 'subcategory' => 'Grab to client site inspection', 'amount' => 480.00, 'receipt_number' => 'REC-002', 'expense_date' => '2026-07-16'],
+            ['payee' => 'Jollibee', 'category' => 'Meals', 'subcategory' => 'Team lunch during site visit', 'amount' => 1250.00, 'receipt_number' => 'REC-003', 'expense_date' => '2026-07-17'],
+            ['payee' => 'Globe Telecom', 'category' => 'Communication', 'subcategory' => 'Monthly internet and load allowance', 'amount' => 500.00, 'receipt_number' => 'REC-004', 'expense_date' => '2026-07-18'],
+            ['payee' => 'SM Supplies', 'category' => 'Office', 'subcategory' => 'Printer ink and folders', 'amount' => 720.00, 'receipt_number' => 'REC-005', 'expense_date' => '2026-07-19'],
         ];
 
         foreach ($expenses as $exp) {

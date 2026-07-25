@@ -46,8 +46,18 @@
                 </div>
 
                 <div class="form-row">
+                    <div class="form-group" style="flex:1;">
+                        <label for="subcategory">Sub-Category / Justification <span style="color:var(--text-muted);text-transform:none;letter-spacing:0;">(optional)</span></label>
+                        <input type="text" name="subcategory" id="subcategory" class="form-control" value="{{ old('subcategory') }}" placeholder="e.g. Bond paper for printing, Grab to client site" maxlength="255">
+                        @error('subcategory')
+                            <div style="color:var(--danger);font-size:0.8rem;margin-top:6px;">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="form-row">
                     <div class="form-group">
-                        <label for="amount">Amount ($)</label>
+                        <label for="amount">Amount (₱)</label>
                         <input type="number" name="amount" id="amount" class="form-control" step="0.01" min="0.01" max="{{ $fund->current_balance }}" value="{{ old('amount') }}" required placeholder="0.00">
                         @error('amount')
                             <div style="color:var(--danger);font-size:0.8rem;margin-top:6px;">{{ $message }}</div>

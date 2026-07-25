@@ -69,6 +69,7 @@
                     <th>Date</th>
                     <th>Payee</th>
                     <th>Category</th>
+                    <th>Sub-Category / Justification</th>
                     <th>Receipt #</th>
                     <th style="text-align:right;">Amount</th>
                     <th style="text-align:right;">Actions</th>
@@ -80,6 +81,7 @@
                     <td style="color:var(--text-secondary);">{{ $exp->expense_date->format('M d, Y') }}</td>
                     <td style="font-weight:500;">{{ $exp->payee }}</td>
                     <td><span style="font-size:0.78rem;background:var(--bg);padding:3px 10px;border-radius:6px;font-weight:500;color:var(--text-secondary);">{{ $exp->category }}</span></td>
+                    <td style="font-size:0.82rem;color:var(--text-secondary);font-style:italic;">{{ $exp->subcategory ?: '-' }}</td>
                     <td style="color:var(--text-muted);font-size:0.82rem;">{{ $exp->receipt_number ?? '-' }}</td>
                     <td style="text-align:right;font-weight:700;font-family:'SF Mono','Cascadia Code',monospace;color:var(--danger);">-₱{{ number_format($exp->amount, 2) }}</td>
                     <td>

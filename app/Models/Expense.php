@@ -11,6 +11,7 @@ class Expense extends Model
         'fund_id',
         'payee',
         'category',
+        'subcategory',
         'amount',
         'receipt_number',
         'expense_date',
