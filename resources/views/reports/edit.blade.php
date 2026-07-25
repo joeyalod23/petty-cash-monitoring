@@ -165,6 +165,7 @@
         const row = document.createElement('tr');
         row.id = 'item-' + itemIndex;
 
+        const expenseId = data ? (data.expense_id || '') : '';
         const expenseDate = data ? data.expense_date.split('T')[0] : '';
         const voucherNo = data ? data.voucher_no : '';
         const referenceNo = data ? (data.reference_no || '') : '';
@@ -174,6 +175,7 @@
         const amount = data ? data.amount : '';
 
         row.innerHTML = `
+            <input type="hidden" name="items[${itemIndex}][expense_id]" value="${expenseId}">
             <td><input type="date" name="items[${itemIndex}][expense_date]" class="form-control" style="font-size:0.78rem;padding:6px 8px;" value="${expenseDate}" required></td>
             <td><input type="text" name="items[${itemIndex}][voucher_no]" class="form-control" style="font-size:0.78rem;padding:6px 8px;" value="${voucherNo}" required></td>
             <td><input type="text" name="items[${itemIndex}][reference_no]" class="form-control" style="font-size:0.78rem;padding:6px 8px;" value="${referenceNo}"></td>

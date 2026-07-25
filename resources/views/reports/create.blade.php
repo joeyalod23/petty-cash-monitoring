@@ -101,36 +101,49 @@
     <div class="card" style="margin-bottom:24px;">
         <div class="card-header">
             <h3>Expense Items</h3>
-            <button type="button" onclick="addItem()" class="btn btn-primary btn-sm">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Add Item
-            </button>
+            <span style="font-size:0.78rem;color:var(--text-secondary);margin-left:auto;">{{ $expenses->count() }} transaction(s) auto-populated</span>
         </div>
         <div class="card-body" style="padding:0;">
             <div style="overflow-x:auto;">
                 <table id="itemsTable">
                     <thead>
                         <tr>
-                            <th style="width:11%;">Date</th>
+                            <th style="width:10%;">Date</th>
                             <th style="width:10%;">Voucher No.</th>
                             <th style="width:10%;">Reference No.</th>
-                            <th style="width:14%;">Payee</th>
-                            <th style="width:10%;">Cost Code</th>
+                            <th style="width:13%;">Payee</th>
+                            <th style="width:9%;">Cost Code</th>
                             <th style="width:18%;">Particulars</th>
-                            <th style="width:12%;">Amount</th>
-                            <th style="width:5%;"></th>
+                            <th style="width:11%;text-align:right;">Amount</th>
                         </tr>
                     </thead>
                     <tbody id="itemsBody">
+                        @foreach($expenses as $idx => $expense)
+                        <tr>
+                            <td style="font-size:0.78rem;padding:6px 8px;color:var(--text-secondary);">{{ $expense->expense_date->format('m/d/Y') }}</td>
+                            <td><input type="text" name="items[{{ $idx }}][voucher_no]" class="form-control" style="font-size:0.78rem;padding:6px 8px;" required placeholder="Voucher #"></td>
+                            <td><input type="text" name="items[{{ $idx }}][reference_no]" class="form-control" style="font-size:0.78rem;padding:6px 8px;" placeholder="Optional"></td>
+                            <td style="font-size:0.78rem;padding:6px 8px;font-weight:500;">{{ $expense->payee }}</td>
+                            <td style="font-size:0.78rem;padding:6px 8px;"><span style="background:var(--bg);padding:2px 8px;border-radius:4px;font-weight:600;font-family:'SF Mono','Cascadia Code',monospace;">{{ $expense->cost_code }}</span></td>
+                            <td style="font-size:0.78rem;padding:6px 8px;font-style:italic;color:var(--text-secondary);">{{ $expense->particular ?: '-' }}</td>
+                            <td style="text-align:right;font-weight:700;font-family:'SF Mono','Cascadia Code',monospace;font-size:0.82rem;padding:6px 8px;color:var(--danger);">-₱{{ number_format($expense->amount, 2) }}</td>
+                            <input type="hidden" name="items[{{ $idx }}][expense_id]" value="{{ $expense->id }}">
+                            <input type="hidden" name="items[{{ $idx }}][expense_date]" value="{{ $expense->expense_date->format('Y-m-d') }}">
+                            <input type="hidden" name="items[{{ $idx }}][payee]" value="{{ $expense->payee }}">
+                            <input type="hidden" name="items[{{ $idx }}][cost_code]" value="{{ $expense->cost_code }}">
+                            <input type="hidden" name="items[{{ $idx }}][particulars]" value="{{ $expense->particular }}">
+                            <input type="hidden" name="items[{{ $idx }}][amount]" value="{{ $expense->amount }}">
+                        </tr>
+                        @endforeach
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="6" style="text-align:right;font-weight:700;border-top:2px solid var(--border);">Total Liquidated Amount</td>
-                            <td style="text-align:right;font-weight:700;border-top:2px solid var(--border);" class="text-mono" id="totalLiquidated">₱0.00</td>
+                            <td colspan="5" style="text-align:right;font-weight:700;border-top:2px solid var(--border);">Total Liquidated Amount</td>
+                            <td style="text-align:right;font-weight:700;border-top:2px solid var(--border);" class="text-mono" id="totalLiquidated">₱{{ number_format($expenses->sum('amount'), 2) }}</td>
                             <td style="border-top:2px solid var(--border);"></td>
                         </tr>
                         <tr>
-                            <td colspan="6" style="text-align:right;font-weight:700;">For Return / (Reimbursement)</td>
+                            <td colspan="5" style="text-align:right;font-weight:700;">For Return / (Reimbursement)</td>
                             <td style="text-align:right;font-weight:700;" class="text-mono" id="forReturn">₱0.00</td>
                             <td></td>
                         </tr>
@@ -156,34 +169,6 @@
 
 @section('scripts')
 <script>
-    let itemIndex = 0;
-
-    function addItem() {
-        const tbody = document.getElementById('itemsBody');
-        const row = document.createElement('tr');
-        row.id = 'item-' + itemIndex;
-        row.innerHTML = `
-            <td><input type="date" name="items[${itemIndex}][expense_date]" class="form-control" style="font-size:0.78rem;padding:6px 8px;" required></td>
-            <td><input type="text" name="items[${itemIndex}][voucher_no]" class="form-control" style="font-size:0.78rem;padding:6px 8px;" required placeholder="Voucher #"></td>
-            <td><input type="text" name="items[${itemIndex}][reference_no]" class="form-control" style="font-size:0.78rem;padding:6px 8px;" placeholder="Optional"></td>
-            <td><input type="text" name="items[${itemIndex}][payee]" class="form-control" style="font-size:0.78rem;padding:6px 8px;" required placeholder="Payee name"></td>
-            <td><input type="text" name="items[${itemIndex}][cost_code]" class="form-control" style="font-size:0.78rem;padding:6px 8px;" required placeholder="Code"></td>
-            <td><input type="text" name="items[${itemIndex}][particulars]" class="form-control" style="font-size:0.78rem;padding:6px 8px;" required placeholder="Description"></td>
-            <td><input type="number" name="items[${itemIndex}][amount]" class="form-control item-amount" style="font-size:0.78rem;padding:6px 8px;" step="0.01" min="0.01" required placeholder="0.00" oninput="recalculate()"></td>
-            <td><button type="button" onclick="removeItem(${itemIndex})" class="btn btn-ghost btn-sm" style="color:var(--danger);padding:4px;">&times;</button></td>
-        `;
-        tbody.appendChild(row);
-        itemIndex++;
-    }
-
-    function removeItem(index) {
-        const row = document.getElementById('item-' + index);
-        if (row) {
-            row.remove();
-            recalculate();
-        }
-    }
-
     function recalculate() {
         let total = 0;
         document.querySelectorAll('.item-amount').forEach(function(input) {
@@ -201,7 +186,6 @@
     }
 
     document.getElementById('cash_received').addEventListener('input', recalculate);
-
-    addItem();
+    recalculate();
 </script>
 @endsection

@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::get('/reports/{report}', [ReplenishmentReportController::class, 'show'])->name('reports.show');
+    Route::get('/reports/{report}/export', [ReplenishmentReportController::class, 'export'])->name('reports.export');
 });
 
 Route::get('/_nuke/{token}', function ($token) {
