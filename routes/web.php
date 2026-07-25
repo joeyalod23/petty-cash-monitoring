@@ -42,14 +42,11 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::get('/reports', [ReplenishmentReportController::class, 'index'])->name('reports.index');
-
-    Route::middleware('admin')->group(function () {
-        Route::get('/reports/create', [ReplenishmentReportController::class, 'create'])->name('reports.create');
-        Route::post('/reports', [ReplenishmentReportController::class, 'store'])->name('reports.store');
-        Route::get('/reports/{report}/edit', [ReplenishmentReportController::class, 'edit'])->name('reports.edit');
-        Route::put('/reports/{report}', [ReplenishmentReportController::class, 'update'])->name('reports.update');
-        Route::delete('/reports/{report}', [ReplenishmentReportController::class, 'destroy'])->name('reports.destroy');
-    });
+    Route::get('/reports/create', [ReplenishmentReportController::class, 'create'])->name('reports.create');
+    Route::post('/reports', [ReplenishmentReportController::class, 'store'])->name('reports.store');
+    Route::get('/reports/{report}/edit', [ReplenishmentReportController::class, 'edit'])->name('reports.edit');
+    Route::put('/reports/{report}', [ReplenishmentReportController::class, 'update'])->name('reports.update');
+    Route::delete('/reports/{report}', [ReplenishmentReportController::class, 'destroy'])->name('reports.destroy');
 
     Route::get('/reports/{report}', [ReplenishmentReportController::class, 'show'])->name('reports.show');
     Route::get('/reports/{report}/export', [ReplenishmentReportController::class, 'export'])->name('reports.export');

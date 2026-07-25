@@ -12,12 +12,10 @@
 <div class="card">
     <div class="card-header">
         <h3>All Replenishment Reports</h3>
-        @if(Auth::user()->isAdmin())
         <a href="{{ route('reports.create') }}" class="btn btn-primary btn-sm">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             New Report
         </a>
-        @endif
     </div>
     @if($reports->isEmpty())
         <div class="empty-state">
@@ -51,14 +49,12 @@
                     <td>
                         <div style="display:flex;gap:6px;justify-content:flex-end;">
                             <a href="{{ route('reports.show', $report) }}" class="btn btn-primary btn-sm">View</a>
-                            @if(Auth::user()->isAdmin())
                             <a href="{{ route('reports.edit', $report) }}" class="btn btn-ghost btn-sm">Edit</a>
                             <form action="{{ route('reports.destroy', $report) }}" method="POST" onsubmit="return confirm('Delete this report and all its items?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger);">Delete</button>
                             </form>
-                            @endif
                         </div>
                     </td>
                 </tr>
