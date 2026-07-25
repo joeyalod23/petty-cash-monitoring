@@ -81,6 +81,28 @@
                     </div>
                 </div>
 
+                <div style="margin-top:20px;padding:14px 18px;border-radius:12px;border:1px solid var(--border);background:var(--bg-alt);" id="balance-preview">
+                    <div style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:10px;font-weight:600;">Balance Preview</div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <span style="font-size:0.8rem;color:var(--text-secondary);">Original Amount</span>
+                        <span style="font-size:0.85rem;font-weight:700;" class="text-mono" id="preview-original">₱{{ number_format($expense->amount, 2) }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <span style="font-size:0.8rem;color:var(--text-secondary);">New Amount</span>
+                        <span style="font-size:0.85rem;font-weight:700;" class="text-mono" id="preview-new">₱{{ number_format($expense->amount, 2) }}</span>
+                    </div>
+                    <div style="height:1px;background:var(--border);margin:10px 0;"></div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <span style="font-size:0.8rem;font-weight:600;">Difference</span>
+                        <span style="font-size:0.9rem;font-weight:800;" class="text-mono" id="preview-diff">₱0.00</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:0.8rem;font-weight:600;">Projected Fund Balance</span>
+                        <span style="font-size:0.9rem;font-weight:800;" class="text-mono" id="preview-balance">₱{{ number_format($fund->current_balance, 2) }}</span>
+                    </div>
+                    <div style="margin-top:10px;padding:6px 10px;border-radius:8px;text-align:center;font-size:0.78rem;font-weight:600;" id="preview-label" style="display:none;"></div>
+                </div>
+
                 <div style="display:flex;gap:10px;margin-top:8px;">
                     <button type="submit" class="btn btn-primary">Update Expense</button>
                     <a href="{{ route('fund.expenses', $fund) }}" class="btn btn-secondary">Cancel</a>
@@ -129,4 +151,61 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+(function() {
+    const originalAmount = {{ $expense->amount }};
+    const currentBalance = {{ $fund->current_balance }};
+    const amountInput = document.getElementById('amount');
+    const previewOriginal = document.getElementById('preview-original');
+    const previewNew = document.getElementById('preview-new');
+    const previewDiff = document.getElementById('preview-diff');
+    const previewBalance = document.getElementById('preview-balance');
+    const previewLabel = document.getElementById('preview-label');
+
+    function formatCurrency(val) {
+        return '₱' + Math.abs(val).toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
+    }
+
+    function recalc() {
+        const newAmt = parseFloat(amountInput.value) || 0;
+        const diff = newAmt - originalAmount;
+        const projectedBalance = currentBalance - diff;
+
+        previewNew.textContent = formatCurrency(newAmt);
+
+        if (diff === 0) {
+            previewDiff.textContent = '₱0.00';
+            previewDiff.style.color = 'var(--text-secondary)';
+            previewBalance.textContent = formatCurrency(currentBalance);
+            previewBalance.style.color = 'var(--text-secondary)';
+            previewLabel.textContent = 'No change';
+            previewLabel.style.background = 'var(--bg-alt)';
+            previewLabel.style.color = 'var(--text-muted)';
+        } else if (diff > 0) {
+            previewDiff.textContent = '+₱' + diff.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
+            previewDiff.style.color = 'var(--danger)';
+            previewBalance.textContent = formatCurrency(projectedBalance);
+            previewBalance.style.color = projectedBalance < 0 ? 'var(--danger)' : 'var(--text-secondary)';
+            previewLabel.textContent = 'Additional ₱' + diff.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' will be deducted from fund';
+            previewLabel.style.background = 'rgba(239,68,68,0.08)';
+            previewLabel.style.color = 'var(--danger)';
+        } else {
+            previewDiff.textContent = '-₱' + Math.abs(diff).toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
+            previewDiff.style.color = 'var(--success)';
+            previewBalance.textContent = formatCurrency(projectedBalance);
+            previewBalance.style.color = 'var(--success)';
+            previewLabel.textContent = '₱' + Math.abs(diff).toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' will be returned to fund';
+            previewLabel.style.background = 'rgba(34,197,94,0.08)';
+            previewLabel.style.color = 'var(--success)';
+        }
+        previewLabel.style.display = 'block';
+    }
+
+    amountInput.addEventListener('input', recalc);
+    recalc();
+})();
+</script>
 @endsection
