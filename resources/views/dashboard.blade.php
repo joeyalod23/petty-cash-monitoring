@@ -197,7 +197,7 @@
                     <th>Fund</th>
                     <th>Payee</th>
                     <th>Category</th>
-                    <th>Justification</th>
+                    <th>Particular</th>
                     <th>Receipt</th>
                     <th style="text-align:right;">Amount</th>
                 </tr>
@@ -209,7 +209,7 @@
                     <td><span class="text-mono">#{{ $exp->fund_id }}</span></td>
                     <td style="font-weight:500;">{{ $exp->payee }}</td>
                     <td><span style="font-size:0.78rem;background:var(--bg);padding:3px 10px;border-radius:6px;font-weight:500;color:var(--text-secondary);">{{ $exp->category }}</span></td>
-                    <td style="font-size:0.82rem;color:var(--text-secondary);font-style:italic;">{{ $exp->subcategory ?: '-' }}</td>
+                    <td style="font-size:0.82rem;color:var(--text-secondary);font-style:italic;">{{ $exp->particular ?: '-' }}</td>
                     <td style="color:var(--text-muted);font-size:0.82rem;">{{ $exp->receipt_number ?? '-' }}</td>
                     <td style="text-align:right;font-weight:700;font-family:'SF Mono','Cascadia Code',monospace;font-size:0.88rem;">-₱{{ number_format($exp->amount, 2) }}</td>
                 </tr>

@@ -47,9 +47,9 @@
 
                 <div class="form-row">
                     <div class="form-group" style="flex:1;">
-                        <label for="subcategory">Sub-Category / Justification <span style="color:var(--text-muted);text-transform:none;letter-spacing:0;">(optional)</span></label>
-                        <input type="text" name="subcategory" id="subcategory" class="form-control" value="{{ old('subcategory') }}" placeholder="e.g. Bond paper for printing, Grab to client site" maxlength="255">
-                        @error('subcategory')
+                        <label for="particular">Particular <span style="color:var(--text-muted);text-transform:none;letter-spacing:0;">(optional)</span></label>
+                        <input type="text" name="particular" id="particular" class="form-control" value="{{ old('particular') }}" placeholder="e.g. Bond paper for printing, Grab to client site" maxlength="255">
+                        @error('particular')
                             <div style="color:var(--danger);font-size:0.8rem;margin-top:6px;">{{ $message }}</div>
                         @enderror
                     </div>

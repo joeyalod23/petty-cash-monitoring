@@ -67,7 +67,7 @@ class PettyCashController extends Controller
         $validated = $request->validate([
             'payee' => 'required|string|max:255',
             'category' => 'required|string|max:100',
-            'subcategory' => 'nullable|string|max:255',
+            'particular' => 'nullable|string|max:255',
             'amount' => 'required|numeric|min:0.01',
             'receipt_number' => 'nullable|string|max:100',
             'expense_date' => 'required|date',
@@ -106,7 +106,7 @@ class PettyCashController extends Controller
         $validated = $request->validate([
             'payee' => 'required|string|max:255',
             'category' => 'required|string|max:100',
-            'subcategory' => 'nullable|string|max:255',
+            'particular' => 'nullable|string|max:255',
             'amount' => 'required|numeric|min:0.01',
             'receipt_number' => 'nullable|string|max:100',
             'expense_date' => 'required|date',
