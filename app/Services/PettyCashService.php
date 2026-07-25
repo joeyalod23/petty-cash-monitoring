@@ -9,10 +9,13 @@ use Illuminate\Support\Facades\DB;
 
 class PettyCashService
 {
+    const FUND_TARGET = 30000.00;
+
     public function recordExpense(PettyCashFund $fund, array $data): array
     {
         return DB::transaction(function () use ($fund, $data) {
             $expenseAmount = number_format((float) $data['amount'], 2, '.', '');
+            $fundTarget = self::FUND_TARGET;
 
             $row = DB::selectOne(
                 'SELECT id, total_amount, current_balance, status FROM petty_cash_funds WHERE id = ? FOR UPDATE',
@@ -28,8 +31,8 @@ class PettyCashService
             }
 
             $newBalance = number_format((float) $row->current_balance - (float) $expenseAmount, 2, '.', '');
-            $threshold = number_format((float) $row->total_amount * 0.30, 2, '.', '');
-            $totalExpenses = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
+            $threshold = number_format($fundTarget * 0.30, 2, '.', '');
+            $totalExpenses = number_format($fundTarget - (float) $newBalance, 2, '.', '');
             $shouldTrigger = (float) $totalExpenses >= (float) $threshold;
 
             $newStatus = $row->status;
@@ -88,8 +91,18 @@ class PettyCashService
 
     public function createFund(float $totalAmount): PettyCashFund
     {
+        $existingFund = PettyCashFund::first();
+
+        if ($existingFund) {
+            $newBalance = number_format((float) $existingFund->current_balance + $totalAmount, 2, '.', '');
+            $existingFund->update([
+                'current_balance' => $newBalance,
+            ]);
+            return $existingFund;
+        }
+
         return PettyCashFund::create([
-            'total_amount' => $totalAmount,
+            'total_amount' => 30000.00,
             'current_balance' => $totalAmount,
             'status' => 'active',
         ]);
@@ -99,6 +112,7 @@ class PettyCashService
     {
         $fund->update([
             'total_amount' => $totalAmount,
+            'current_balance' => $totalAmount,
         ]);
     }
 
@@ -113,6 +127,7 @@ class PettyCashService
             $oldAmount = (float) $expense->amount;
             $newAmount = (float) $data['amount'];
             $diff = $newAmount - $oldAmount;
+            $fundTarget = self::FUND_TARGET;
 
             DB::update(
                 'UPDATE expenses SET payee = ?, category = ?, particular = ?, cost_code = ?, amount = ?, receipt_number = ?, expense_date = ?, updated_at = NOW() WHERE id = ?',
@@ -136,8 +151,8 @@ class PettyCashService
 
                 if ($row) {
                     $newBalance = number_format((float) $row->current_balance - $diff, 2, '.', '');
-                    $threshold = number_format((float) $row->total_amount * 0.30, 2, '.', '');
-                    $totalExpenses = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
+                    $threshold = number_format($fundTarget * 0.30, 2, '.', '');
+                    $totalExpenses = number_format($fundTarget - (float) $newBalance, 2, '.', '');
                     $shouldTrigger = (float) $totalExpenses >= (float) $threshold;
 
                     $newStatus = $row->status;
@@ -235,6 +250,7 @@ class PettyCashService
             ->first();
 
         if (!$pendingRequest) {
+            $request->fund->current_balance = self::FUND_TARGET;
             $request->fund->status = 'active';
             $request->fund->save();
         }

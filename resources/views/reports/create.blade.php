@@ -171,7 +171,7 @@
 <script>
     function recalculate() {
         let total = 0;
-        document.querySelectorAll('.item-amount').forEach(function(input) {
+        document.querySelectorAll('input[name*="[amount]"]').forEach(function(input) {
             const val = parseFloat(input.value);
             if (!isNaN(val)) {
                 total += val;

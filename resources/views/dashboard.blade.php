@@ -1,8 +1,9 @@
 @extends('layouts.app')
 @php
-    $totalAllocated = $funds->sum('total_amount');
+    $fundTarget = 30000;
+    $totalAllocated = $fundTarget * max($funds->count(), 1);
     $totalBalance = $funds->sum('current_balance');
-    $totalExpenses = $funds->sum(fn($f) => $f->total_amount - $f->current_balance);
+    $totalExpenses = $totalAllocated - $totalBalance;
 @endphp
 
 @section('page-title', 'Dashboard')
@@ -105,7 +106,7 @@
         @if(Auth::user()->isAdmin())
         <button onclick="document.getElementById('createFundModal').style.display='flex'" class="btn btn-primary btn-sm">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            New Fund
+            Add Fund (Replenish)
         </button>
         @endif
     </div>
@@ -129,8 +130,9 @@
             <tbody>
                 @foreach($funds as $fund)
                 @php
-                    $totalFundExpenses = $fund->total_amount - $fund->current_balance;
-                    $expensePct = $fund->total_amount > 0 ? ($totalFundExpenses / $fund->total_amount) * 100 : 0;
+                    $fundTarget = 30000;
+                    $totalFundExpenses = $fundTarget - $fund->current_balance;
+                    $expensePct = $fundTarget > 0 ? ($totalFundExpenses / $fundTarget) * 100 : 0;
                     $fillClass = $expensePct > 50 ? 'red' : ($expensePct > 30 ? 'yellow' : 'green');
                     $statusLabel = match($fund->status) {
                         'active' => 'Active',
@@ -143,7 +145,7 @@
                     <td>
                         <span class="text-mono" style="font-weight:600;">#{{ $fund->id }}</span>
                     </td>
-                    <td class="text-mono">₱{{ number_format($fund->total_amount, 2) }}</td>
+                    <td class="text-mono">₱{{ number_format($fundTarget, 2) }}</td>
                     <td class="text-mono" style="font-weight:600;">₱{{ number_format($fund->current_balance, 2) }}</td>
                     <td>
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
@@ -201,6 +203,9 @@
                     <th>Cost Code</th>
                     <th>Receipt</th>
                     <th style="text-align:right;">Amount</th>
+                    @if(Auth::user()->isAdmin())
+                    <th style="text-align:right;">Actions</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -214,6 +219,11 @@
                     <td><span style="font-size:0.78rem;background:var(--bg);padding:3px 10px;border-radius:6px;font-weight:600;color:var(--text-secondary);font-family:'SF Mono','Cascadia Code',monospace;">{{ $exp->cost_code }}</span></td>
                     <td style="color:var(--text-muted);font-size:0.82rem;">{{ $exp->receipt_number ?? '-' }}</td>
                     <td style="text-align:right;font-weight:700;font-family:'SF Mono','Cascadia Code',monospace;font-size:0.88rem;">-₱{{ number_format($exp->amount, 2) }}</td>
+                    @if(Auth::user()->isAdmin())
+                    <td style="text-align:right;">
+                        <a href="{{ route('expenses.edit', $exp) }}" class="btn btn-ghost btn-sm">Edit</a>
+                    </td>
+                    @endif
                 </tr>
                 @endforeach
             </tbody>
@@ -225,14 +235,14 @@
 <div id="createFundModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
     <div style="background:var(--surface);border-radius:var(--radius);width:100%;max-width:440px;box-shadow:var(--shadow-lg);overflow:hidden;">
         <div style="padding:24px 28px 0;">
-            <h3 style="font-size:1.05rem;font-weight:700;">Create New Petty Cash Fund</h3>
-            <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">Set the total allocation amount for this fund.</p>
+            <h3 style="font-size:1.05rem;font-weight:700;">Add Fund (Replenish to ₱30,000)</h3>
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">Amount to add to the existing fund. Fund total is maintained at ₱30,000.</p>
         </div>
         <form action="{{ route('funds.store') }}" method="POST" style="padding:20px 28px 24px;">
             @csrf
             <div class="form-group">
-                <label for="total_amount">Allocation Amount ($)</label>
-                <input type="number" name="total_amount" id="total_amount" class="form-control" step="0.01" min="1" required placeholder="e.g. 5000.00" autofocus>
+                <label for="total_amount">Amount to Add (₱)</label>
+                <input type="number" name="total_amount" id="total_amount" class="form-control" step="0.01" min="1" required placeholder="e.g. 10000.00" autofocus>
                 @error('total_amount')
                     <div style="color:var(--danger);font-size:0.8rem;margin-top:6px;">{{ $message }}</div>
                 @enderror

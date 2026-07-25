@@ -31,7 +31,7 @@ class PettyCashController extends Controller
 
         $this->service->createFund($validated['total_amount']);
 
-        return redirect()->route('dashboard')->with('success', 'Petty cash fund created successfully.');
+        return redirect()->route('dashboard')->with('success', 'Fund replenished successfully. Balance updated to maintain ₱30,000 target.');
     }
 
     public function editFund(PettyCashFund $fund)
@@ -47,7 +47,7 @@ class PettyCashController extends Controller
 
         $this->service->updateFund($fund, $validated['total_amount']);
 
-        return redirect()->route('dashboard')->with('success', 'Fund updated successfully.');
+        return redirect()->route('dashboard')->with('success', 'Fund balance updated to ₱' . number_format($validated['total_amount'], 2) . '.');
     }
 
     public function destroyFund(PettyCashFund $fund)
@@ -79,7 +79,9 @@ class PettyCashController extends Controller
 
             $message = 'Expense logged successfully.';
             if ($result['alert_triggered']) {
-                $message .= ' Total expenses reached 30% of fund - marked for liquidation & replenishment request auto-generated.';
+                $message .= ' Total expenses reached 30% of fund. Redirecting to create replenishment report.';
+                return redirect()->route('reports.create')
+                    ->with('success', $message);
             }
 
             return redirect()->route('fund.expenses', $fund)

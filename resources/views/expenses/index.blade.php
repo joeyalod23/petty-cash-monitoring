@@ -1,7 +1,8 @@
 @extends('layouts.app')
 @php
-    $totalExpenses = $fund->total_amount - $fund->current_balance;
-    $expensePct = $fund->total_amount > 0 ? ($totalExpenses / $fund->total_amount) * 100 : 0;
+    $fundTarget = 30000;
+    $totalExpenses = $fundTarget - $fund->current_balance;
+    $expensePct = $fundTarget > 0 ? ($totalExpenses / $fundTarget) * 100 : 0;
     $fillClass = $expensePct > 50 ? 'red' : ($expensePct > 30 ? 'yellow' : 'green');
 @endphp
 
@@ -41,9 +42,9 @@
         </div>
         <div class="stat-info">
             <div class="label">30% Expense Threshold</div>
-            <div class="value">₱{{ number_format($fund->total_amount * 0.30, 2) }}</div>
-            <div class="sub" style="color:{{ $totalExpenses >= ($fund->total_amount * 0.30) ? 'var(--danger)' : 'var(--text-muted)' }}; font-weight:{{ $totalExpenses >= ($fund->total_amount * 0.30) ? '600' : '400' }};">
-                {{ $totalExpenses >= ($fund->total_amount * 0.30) ? 'LIQUIDATE & REPLENISH' : 'Above threshold' }}
+            <div class="value">₱{{ number_format($fundTarget * 0.30, 2) }}</div>
+            <div class="sub" style="color:{{ $totalExpenses >= ($fundTarget * 0.30) ? 'var(--danger)' : 'var(--text-muted)' }}; font-weight:{{ $totalExpenses >= ($fundTarget * 0.30) ? '600' : '400' }};">
+                {{ $totalExpenses >= ($fundTarget * 0.30) ? 'LIQUIDATE & REPLENISH' : 'Above threshold' }}
             </div>
         </div>
     </div>

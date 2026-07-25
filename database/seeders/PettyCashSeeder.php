@@ -11,8 +11,8 @@ class PettyCashSeeder extends Seeder
     public function run(): void
     {
         $fund = PettyCashFund::create([
-            'total_amount' => 5000.00,
-            'current_balance' => 5000.00,
+            'total_amount' => 30000.00,
+            'current_balance' => 30000.00,
             'status' => 'active',
         ]);
 

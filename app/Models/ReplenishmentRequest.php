@@ -29,7 +29,7 @@ class ReplenishmentRequest extends Model
         $this->update(['status' => 'disbursed']);
 
         $fund = $this->fund;
-        $fund->current_balance = $fund->total_amount;
+        $fund->current_balance = 30000.00;
         $fund->status = 'active';
         $fund->save();
     }

@@ -1,7 +1,8 @@
 @extends('layouts.app')
 @php
-    $totalExpenses = $fund->total_amount - $fund->current_balance;
-    $expensePct = $fund->total_amount > 0 ? ($totalExpenses / $fund->total_amount) * 100 : 0;
+    $fundTarget = 30000;
+    $totalExpenses = $fundTarget - $fund->current_balance;
+    $expensePct = $fundTarget > 0 ? ($totalExpenses / $fundTarget) * 100 : 0;
     $fillClass = $expensePct > 50 ? 'red' : ($expensePct > 30 ? 'yellow' : 'green');
 @endphp
 
@@ -114,7 +115,7 @@
                 <div style="border-top:1px solid var(--border);padding-top:14px;">
                     <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
                         <span style="font-size:0.8rem;color:var(--text-secondary);">Allocated</span>
-                        <span style="font-size:0.8rem;font-weight:600;" class="text-mono">₱{{ number_format($fund->total_amount, 2) }}</span>
+                        <span style="font-size:0.8rem;font-weight:600;" class="text-mono">₱{{ number_format($fundTarget, 2) }}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
                         <span style="font-size:0.8rem;color:var(--text-secondary);">Spent</span>
@@ -122,9 +123,9 @@
                     </div>
                     <div style="display:flex;justify-content:space-between;">
                         <span style="font-size:0.8rem;color:var(--text-secondary);">30% Expense Threshold</span>
-                        <span style="font-size:0.8rem;font-weight:600;" class="text-mono">₱{{ number_format($fund->total_amount * 0.30, 2) }}</span>
+                        <span style="font-size:0.8rem;font-weight:600;" class="text-mono">₱{{ number_format($fundTarget * 0.30, 2) }}</span>
                     </div>
-                    @if($totalExpenses >= $fund->total_amount * 0.30)
+                    @if($totalExpenses >= $fundTarget * 0.30)
                     <div style="margin-top:10px;padding:8px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:0.78rem;color:var(--danger);font-weight:600;text-align:center;">
                         Liquidate & Replenish
                     </div>
