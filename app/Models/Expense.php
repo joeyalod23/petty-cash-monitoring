@@ -12,6 +12,7 @@ class Expense extends Model
         'payee',
         'category',
         'particular',
+        'cost_code',
         'amount',
         'receipt_number',
         'expense_date',

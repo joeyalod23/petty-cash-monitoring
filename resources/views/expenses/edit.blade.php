@@ -57,6 +57,13 @@
 
                 <div class="form-row">
                     <div class="form-group">
+                        <label for="cost_code">Cost Code</label>
+                        <input type="text" name="cost_code" id="cost_code" class="form-control" value="{{ old('cost_code', $expense->cost_code) }}" placeholder="e.g. CC-001" maxlength="100" required>
+                        @error('cost_code')
+                            <div style="color:var(--danger);font-size:0.8rem;margin-top:6px;">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="form-group">
                         <label for="amount">Amount (₱)</label>
                         <input type="number" name="amount" id="amount" class="form-control" step="0.01" min="0.01" value="{{ old('amount', $expense->amount) }}" required>
                         @error('amount')

@@ -10,13 +10,14 @@ return new class extends Migration
     {
         Schema::table('expenses', function (Blueprint $table) {
             $table->string('particular', 255)->nullable()->after('category');
+            $table->string('cost_code', 100)->after('particular');
         });
     }
 
     public function down(): void
     {
         Schema::table('expenses', function (Blueprint $table) {
-            $table->dropColumn('particular');
+            $table->dropColumn(['particular', 'cost_code']);
         });
     }
 };
