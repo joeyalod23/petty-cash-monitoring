@@ -74,6 +74,7 @@
                     <th>Cost Code</th>
                     <th>Receipt #</th>
                     <th style="text-align:right;">Amount</th>
+                    <th style="text-align:center;">Status</th>
                     <th style="text-align:right;">Actions</th>
                 </tr>
             </thead>
@@ -87,6 +88,9 @@
                     <td><span style="font-size:0.78rem;background:var(--bg);padding:3px 10px;border-radius:6px;font-weight:600;color:var(--text-secondary);font-family:'SF Mono','Cascadia Code',monospace;">{{ $exp->cost_code }}</span></td>
                     <td style="color:var(--text-muted);font-size:0.82rem;">{{ $exp->receipt_number ?? '-' }}</td>
                     <td style="text-align:right;font-weight:700;font-family:'SF Mono','Cascadia Code',monospace;color:var(--danger);">-₱{{ number_format($exp->amount, 2) }}</td>
+                    <td style="text-align:center;">
+                        <span style="font-size:0.72rem;padding:3px 10px;border-radius:6px;font-weight:600;{{ $exp->status === 'closed' ? 'background:rgba(34,197,94,0.1);color:#0a8c67;' : 'background:rgba(255,181,71,0.1);color:#996a0a;' }}">{{ ucfirst($exp->status) }}</span>
+                    </td>
                     <td>
                         @if(Auth::user()->isAdmin())
                         <div style="display:flex;gap:6px;justify-content:flex-end;">

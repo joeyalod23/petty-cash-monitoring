@@ -19,9 +19,14 @@ class ReplenishmentReportController extends Controller
 
     public function create()
     {
-        $expenses = Expense::with('fund')->latest('expense_date')->get();
+        $expenses = Expense::with('fund')
+            ->where('status', 'open')
+            ->latest('expense_date')
+            ->get();
 
-        return view('reports.create', compact('expenses'));
+        $totalLiquidation = (float) $expenses->sum('amount');
+
+        return view('reports.create', compact('expenses', 'totalLiquidation'));
     }
 
     public function store(Request $request)
@@ -62,6 +67,7 @@ class ReplenishmentReportController extends Controller
                 'verified_by' => $validated['verified_by'],
             ]);
 
+            $expenseIds = [];
             foreach ($validated['items'] as $item) {
                 $report->items()->create([
                     'expense_id' => $item['expense_id'] ?? null,
@@ -74,6 +80,13 @@ class ReplenishmentReportController extends Controller
                     'amount' => $item['amount'],
                     'group_key' => $item['cost_code'] . '|' . $item['particulars'],
                 ]);
+                if (!empty($item['expense_id'])) {
+                    $expenseIds[] = $item['expense_id'];
+                }
+            }
+
+            if (!empty($expenseIds)) {
+                Expense::whereIn('id', $expenseIds)->update(['status' => 'closed']);
             }
 
             return $report;

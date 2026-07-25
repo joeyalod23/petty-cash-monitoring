@@ -66,7 +66,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="cash_received">Cash Received (₱)</label>
-                    <input type="number" name="cash_received" id="cash_received" class="form-control" step="0.01" min="0" value="{{ old('cash_received') }}" required placeholder="0.00">
+                    <input type="number" name="cash_received" id="cash_received" class="form-control" step="0.01" min="0" value="{{ old('cash_received', number_format($totalLiquidation, 2, '.', '')) }}" required placeholder="0.00">
                     @error('cash_received')
                         <div style="color:var(--danger);font-size:0.8rem;margin-top:6px;">{{ $message }}</div>
                     @enderror
@@ -103,6 +103,12 @@
             <h3>Expense Items</h3>
             <span style="font-size:0.78rem;color:var(--text-secondary);margin-left:auto;">{{ $expenses->count() }} transaction(s) auto-populated</span>
         </div>
+        @if($expenses->isEmpty())
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <p>No open expenses to report. All expenses have been liquidated.</p>
+            </div>
+        @else
         <div class="card-body" style="padding:0;">
             <div style="overflow-x:auto;">
                 <table id="itemsTable">
@@ -139,7 +145,7 @@
                     <tfoot>
                         <tr>
                             <td colspan="5" style="text-align:right;font-weight:700;border-top:2px solid var(--border);">Total Liquidated Amount</td>
-                            <td style="text-align:right;font-weight:700;border-top:2px solid var(--border);" class="text-mono" id="totalLiquidated">₱{{ number_format($expenses->sum('amount'), 2) }}</td>
+                            <td style="text-align:right;font-weight:700;border-top:2px solid var(--border);" class="text-mono" id="totalLiquidated">₱{{ number_format($totalLiquidation, 2) }}</td>
                             <td style="border-top:2px solid var(--border);"></td>
                         </tr>
                         <tr>
@@ -154,10 +160,11 @@
                 <div style="color:var(--danger);font-size:0.8rem;padding:12px 24px;">{{ $message }}</div>
             @enderror
         </div>
+        @endif
     </div>
 
     <div style="display:flex;gap:10px;margin-bottom:48px;">
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="btn btn-primary" {{ $expenses->isEmpty() ? 'disabled' : '' }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             Create Report
         </button>
