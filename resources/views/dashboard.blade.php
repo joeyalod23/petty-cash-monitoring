@@ -81,6 +81,7 @@
                 <td style="color:var(--text-secondary);">{{ $req->triggered_by }}</td>
                 <td style="color:var(--text-secondary);">{{ $req->created_at->format('M d, Y H:i') }}</td>
                 <td>
+                    @if(Auth::user()->isAdmin())
                     <div style="display:flex;gap:6px;">
                         <form action="{{ route('replenishments.approve', $req) }}" method="POST">
                             @csrf
@@ -91,6 +92,9 @@
                             <button type="submit" class="btn btn-danger btn-sm">Reject</button>
                         </form>
                     </div>
+                    @else
+                    <span style="color:var(--text-muted);font-size:0.82rem;">View only</span>
+                    @endif
                 </td>
             </tr>
             @endforeach
