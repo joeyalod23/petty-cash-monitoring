@@ -47,6 +47,7 @@
         "vercel": [
             "npm install --include=dev --no-audit --no-fund",
             "npm run build",
+            "@php scripts/vercel-key.php",
             "@php artisan package:discover --ansi",
             "@php artisan event:cache"
         ],
