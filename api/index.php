@@ -8,12 +8,12 @@ ini_set('error_log', 'stderr');
 function vercel_env_load(string $file): void
 {
     if (! is_file($file)) {
-        fwrite(STDERR, '[vercel] vercel.env NOT found at '.$file."\n");
+        error_log('[vercel] vercel.env NOT found at '.$file);
 
         return;
     }
 
-    fwrite(STDERR, '[vercel] vercel.env found at '.$file."\n");
+    error_log('[vercel] vercel.env found at '.$file);
 
     foreach (file($file, FILE_IGNORE_NEW_LINES) as $line) {
         $line = trim($line);
@@ -55,15 +55,15 @@ if (getenv('APP_KEY') === false && is_file(__DIR__.'/../bootstrap/vercel-key.php
     }
 }
 
-fwrite(STDERR, '[vercel] APP_KEY='.(getenv('APP_KEY') !== false ? 'SET' : 'MISSING')."\n");
-fwrite(STDERR, '[vercel] APP_DEBUG='.(getenv('APP_DEBUG') !== false ? getenv('APP_DEBUG') : 'MISSING')."\n");
-fwrite(STDERR, '[vercel] DB_CONNECTION='.(getenv('DB_CONNECTION') !== false ? getenv('DB_CONNECTION') : 'MISSING')."\n");
-fwrite(STDERR, '[vercel] SESSION_DRIVER='.(getenv('SESSION_DRIVER') !== false ? getenv('SESSION_DRIVER') : 'MISSING')."\n");
+error_log('[vercel] APP_KEY='.(getenv('APP_KEY') !== false ? 'SET' : 'MISSING'));
+error_log('[vercel] APP_DEBUG='.(getenv('APP_DEBUG') !== false ? getenv('APP_DEBUG') : 'MISSING'));
+error_log('[vercel] DB_CONNECTION='.(getenv('DB_CONNECTION') !== false ? getenv('DB_CONNECTION') : 'MISSING'));
+error_log('[vercel] SESSION_DRIVER='.(getenv('SESSION_DRIVER') !== false ? getenv('SESSION_DRIVER') : 'MISSING'));
 
 try {
     require __DIR__.'/../public/index.php';
 } catch (Throwable $e) {
-    fwrite(STDERR, '[vercel] FATAL '.$e::class.': '.$e->getMessage()."\n".$e->getTraceAsString()."\n");
+    error_log('[vercel] FATAL '.$e::class.': '.$e->getMessage()."\n".$e->getTraceAsString());
     http_response_code(500);
     header('Content-Type: text/plain');
     echo 'Error';
