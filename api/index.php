@@ -70,16 +70,28 @@ if (getenv('VERCEL_PROBE') !== false) {
     try {
         require_once __DIR__.'/../vendor/autoload.php';
         $probeApp = new Illuminate\Foundation\Application(dirname(__DIR__));
+        $probeApp->useStoragePath('/tmp/storage');
         (new Illuminate\Foundation\Bootstrap\LoadConfiguration())->bootstrap($probeApp);
         vlog('probe: default channel = '.var_export($probeApp['config']['logging.default'], true));
         vlog('probe: storage_path = '.$probeApp->storagePath());
+        vlog('probe: emergency path = '.var_export($probeApp['config']['logging.channels.emergency.path'], true));
+
+        $resolve = new ReflectionMethod(Illuminate\Log\LogManager::class, 'resolve');
+
+        try {
+            $resolve->invoke($probeApp['log'], 'stderr');
+            vlog('probe: resolve(stderr) OK');
+        } catch (Throwable $e2) {
+            vlog('probe: resolve(stderr) THREW: '.$e2::class.': '.$e2->getMessage());
+            vlog('probe: '.str_replace("\n", ' | ', $e2->getTraceAsString()));
+        }
 
         try {
             $probeApp['log']->channel('stderr')->info('stderr probe');
             vlog('probe: stderr channel OK');
-        } catch (Throwable $e2) {
-            vlog('probe: stderr channel FAILED: '.$e2::class.': '.$e2->getMessage());
-            vlog('probe: '.str_replace("\n", ' | ', $e2->getTraceAsString()));
+        } catch (Throwable $e3) {
+            vlog('probe: stderr channel FAILED: '.$e3::class.': '.$e3->getMessage());
+            vlog('probe: '.str_replace("\n", ' | ', $e3->getTraceAsString()));
         }
     } catch (Throwable $e) {
         vlog('probe: boot FAILED: '.$e::class.': '.$e->getMessage());
