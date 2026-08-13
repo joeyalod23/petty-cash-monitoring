@@ -19,7 +19,9 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        DB::reconnect();
-        DB::purge();
+        if (! $this->app->runningInConsole()) {
+            DB::reconnect();
+            DB::purge();
+        }
     }
 }
