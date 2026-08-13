@@ -1,0 +1,42 @@
+{
+    "version": 2,
+    "framework": null,
+    "outputDirectory": "public",
+    "functions": {
+        "api/index.php": {
+            "runtime": "vercel-php@0.9.0"
+        }
+    },
+    "routes": [
+        {
+            "src": "/build/(.*)",
+            "dest": "/build/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/api/index.php"
+        }
+    ],
+    "env": {
+        "APP_NAME": "Petty Cash Monitoring",
+        "APP_ENV": "production",
+        "APP_DEBUG": "false",
+        "APP_CONFIG_CACHE": "/tmp/config.php",
+        "APP_EVENTS_CACHE": "/tmp/events.php",
+        "APP_PACKAGES_CACHE": "/tmp/packages.php",
+        "APP_ROUTES_CACHE": "/tmp/routes.php",
+        "APP_SERVICES_CACHE": "/tmp/services.php",
+        "VIEW_COMPILED_PATH": "/tmp",
+        "CACHE_STORE": "array",
+        "LOG_CHANNEL": "stderr",
+        "SESSION_DRIVER": "cookie",
+        "QUEUE_CONNECTION": "sync",
+        "DB_CONNECTION": "pgsql",
+        "DB_HOST": "ep-young-glade-axdohfcg-pooler.c-4.us-east-2.aws.neon.tech",
+        "DB_PORT": "5432",
+        "DB_DATABASE": "neondb",
+        "DB_USERNAME": "neondb_owner",
+        "DB_PASSWORD": "npg_V5dfBkoQAPp1",
+        "DB_SSLMODE": "require"
+    }
+}
