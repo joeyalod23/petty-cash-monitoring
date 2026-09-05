@@ -1,9 +1,11 @@
-node_modules
 .git
 .env
 .env.*
 !.env.example
-storage/logs/*.log
-storage/framework/cache/*
+.vercel
+node_modules
+storage
+tests
 vendor
-npm-debug.log
+database/database.sqlite
+composer.phar

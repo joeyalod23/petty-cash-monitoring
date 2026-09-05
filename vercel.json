@@ -1,35 +1,16 @@
 {
-    "version": 2,
-    "framework": null,
-    "outputDirectory": "public",
-    "functions": {
-        "api/index.php": {
-            "runtime": "vercel-php@0.9.0"
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "services": {
+        "app": {
+            "root": ".",
+            "entrypoint": "Dockerfile.vercel",
+            "runtime": "container"
         }
     },
-    "routes": [
+    "rewrites": [
         {
-            "src": "/build/(.*)",
-            "dest": "/build/$1"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/api/index.php"
+            "source": "/(.*)",
+            "destination": { "service": "app" }
         }
-    ],
-    "env": {
-        "APP_NAME": "Petty Cash Monitoring",
-        "APP_ENV": "production",
-        "APP_DEBUG": "false",
-        "APP_CONFIG_CACHE": "/tmp/config.php",
-        "APP_EVENTS_CACHE": "/tmp/events.php",
-        "APP_PACKAGES_CACHE": "/tmp/packages.php",
-        "APP_ROUTES_CACHE": "/tmp/routes.php",
-        "APP_SERVICES_CACHE": "/tmp/services.php",
-        "VIEW_COMPILED_PATH": "/tmp",
-        "CACHE_STORE": "array",
-        "LOG_CHANNEL": "stderr",
-        "SESSION_DRIVER": "cookie",
-        "QUEUE_CONNECTION": "sync"
-    }
+    ]
 }
