@@ -272,6 +272,25 @@ class GoogleSheetStore implements SheetStore
         return $this->spreadsheetId;
     }
 
+    /**
+     * Grant an account Editor (writer) access to the spreadsheet so it shows up
+     * in that user's Google Drive.
+     */
+    public function shareWith(string $email): void
+    {
+        if (!$this->spreadsheetId) {
+            throw new \RuntimeException('No spreadsheet id configured to share.');
+        }
+
+        $permission = new Drive\Permission([
+            'type' => 'user',
+            'role' => 'writer',
+            'emailAddress' => $email,
+        ]);
+
+        $this->drive()->permissions->create($this->spreadsheetId, $permission);
+    }
+
     private function buildClient(): Client
     {
         $client = new Client();

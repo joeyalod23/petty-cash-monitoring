@@ -12,6 +12,7 @@ class GSheetSetup extends Command
 {
     protected $signature = 'gsheet:setup
         {--create : Create a brand new Google spreadsheet and provision it}
+        {--share= : Email to grant Editor access when --create is passed}
         {--seed : Seed the default users and an initial fund}
         {--title=Petty Cash Monitoring Database : Title used when --create is passed}';
 
@@ -48,6 +49,13 @@ class GSheetSetup extends Command
             $store->setSpreadsheetId($spreadsheetId);
             $store->provisionSchema(config('gsheet.tables'));
             $this->info('Google Sheets database provisioned. Worksheets ready: ' . implode(', ', array_keys(config('gsheet.tables'))));
+
+            $shareEmail = $this->option('share');
+
+            if ($shareEmail && $store instanceof GoogleSheetStore) {
+                $store->shareWith($shareEmail);
+                $this->info('Shared spreadsheet with ' . $shareEmail . ' (Editor).');
+            }
         } else {
             $this->warn('Running with the local fallback driver (GSHEET_DRIVER not set to google).');
             $database->provisionSchema(config('gsheet.tables'));
@@ -62,18 +70,24 @@ class GSheetSetup extends Command
 
     private function seedDefaults(SheetDatabase $database): void
     {
+        $now = now()->toDateTimeString();
+
         if ($database->count('users') === 0) {
             $database->insert('users', [
                 'name' => 'Admin',
                 'role' => 'admin',
                 'email' => 'admin@admin.com',
                 'password' => Hash::make('password'),
+                'created_at' => $now,
+                'updated_at' => $now,
             ]);
             $database->insert('users', [
                 'name' => 'User',
                 'role' => 'user',
                 'email' => 'user@user.com',
                 'password' => Hash::make('password'),
+                'created_at' => $now,
+                'updated_at' => $now,
             ]);
             $this->info('Seeded default users (admin@admin.com / user@user.com, password: "password").');
         } else {
@@ -85,6 +99,8 @@ class GSheetSetup extends Command
                 'total_amount' => number_format(PettyCashService::fundTarget(), 2, '.', ''),
                 'current_balance' => number_format(PettyCashService::fundTarget(), 2, '.', ''),
                 'status' => 'active',
+                'created_at' => $now,
+                'updated_at' => $now,
             ]);
             $this->info('Seeded initial petty cash fund.');
         } else {
