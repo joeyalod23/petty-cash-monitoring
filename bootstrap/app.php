@@ -26,10 +26,4 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })
     ->create();
 
-// The Vercel function filesystem is read-only; point the storage path at the
-// writable /tmp directory so logs/cache can be written during the request.
-if (getenv('APP_ENV') === 'production' || ($_ENV['APP_ENV'] ?? null) === 'production') {
-    $app->useStoragePath('/tmp/storage');
-}
-
 return $app;
