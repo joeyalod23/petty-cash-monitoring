@@ -30,13 +30,6 @@
         "CACHE_STORE": "array",
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie",
-        "QUEUE_CONNECTION": "sync",
-        "DB_CONNECTION": "pgsql",
-        "DB_HOST": "ep-young-glade-axdohfcg-pooler.c-4.us-east-2.aws.neon.tech",
-        "DB_PORT": "5432",
-        "DB_DATABASE": "neondb",
-        "DB_USERNAME": "neondb_owner",
-        "DB_PASSWORD": "npg_V5dfBkoQAPp1",
-        "DB_SSLMODE": "require"
+        "QUEUE_CONNECTION": "sync"
     }
 }

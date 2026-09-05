@@ -8,7 +8,6 @@ ini_set('error_log', 'stderr');
 function vlog(string $msg): void
 {
     error_log('[vercel] '.$msg);
-    @file_put_contents('C:/Users/Admin/AppData/Local/Temp/opencode/debug.log', $msg.PHP_EOL, FILE_APPEND);
 }
 
 function vercel_env_load(string $file): void
