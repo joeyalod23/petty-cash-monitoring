@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>User Manual - Petty Cash Monitoring System</title>
+<style>
+  @page { size: A4; margin: 20mm 18mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; color: #1b2559; line-height: 1.6; }
+  .cover { page-break-after: always; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 90vh; text-align: center; }
+  .cover-logo { width: 80px; height: 80px; background: #4318ff; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 30px; }
+  .cover-logo span { color: #fff; font-size: 32px; font-weight: 800; }
+  .cover h1 { font-size: 28pt; font-weight: 800; color: #1b2559; margin-bottom: 8px; }
+  .cover h2 { font-size: 14pt; font-weight: 500; color: #68769f; margin-bottom: 40px; }
+  .cover-meta { font-size: 10pt; color: #68769f; line-height: 2; }
+  .cover-meta strong { color: #1b2559; }
+  h1 { font-size: 18pt; font-weight: 800; color: #1b2559; border-bottom: 3px solid #4318ff; padding-bottom: 6px; margin: 30px 0 16px 0; }
+  h2 { font-size: 13pt; font-weight: 700; color: #4318ff; margin: 22px 0 10px 0; }
+  h3 { font-size: 11pt; font-weight: 700; color: #1b2559; margin: 16px 0 8px 0; }
+  p, li { font-size: 10.5pt; margin-bottom: 6px; }
+  ul, ol { padding-left: 22px; margin-bottom: 10px; }
+  li { margin-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 10pt; }
+  th { background: #1b2559; color: #fff; padding: 8px 10px; text-align: left; font-weight: 600; }
+  td { padding: 7px 10px; border-bottom: 1px solid #e5e8ed; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  .note { background: #f0f4ff; border-left: 4px solid #4318ff; padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 10pt; }
+  .warn { background: #fef3cd; border-left: 4px solid #ffc107; padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 10pt; }
+  .page-break { page-break-before: always; }
+  code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 9.5pt; font-family: 'Consolas', monospace; }
+  .toc a { text-decoration: none; color: #1b2559; }
+  .toc a:hover { color: #4318ff; }
+  .toc ul { list-style: none; padding-left: 0; }
+  .toc li { padding: 4px 0; border-bottom: 1px dotted #e5e8ed; }
+  .toc li li { padding-left: 20px; border-bottom: none; }
+  .section-num { color: #4318ff; font-weight: 700; margin-right: 6px; }
+  .footer { text-align: center; font-size: 8pt; color: #a3aed0; margin-top: 40px; border-top: 1px solid #e5e8ed; padding-top: 10px; }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <div class="cover-logo"><span>PC</span></div>
+  <h1>Petty Cash Monitoring System</h1>
+  <h2>User Manual</h2>
+  <div class="cover-meta">
+    <strong>Organization:</strong> L.V. Ledesma Construction, Inc.<br>
+    <strong>Version:</strong> 1.0<br>
+    <strong>Date:</strong> July 2026<br>
+    <strong>Prepared by:</strong> Francis Joey Alod
+  </div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<h1>Table of Contents</h1>
+<div class="toc">
+<ul>
+  <li><span class="section-num">1.</span> Introduction
+    <ul>
+      <li>1.1 Purpose of the System</li>
+      <li>1.2 User Roles</li>
+      <li>1.3 System Access</li>
+    </ul>
+  </li>
+  <li><span class="section-num">2.</span> Getting Started
+    <ul>
+      <li>2.1 Logging In</li>
+      <li>2.2 Logging Out</li>
+    </ul>
+  </li>
+  <li><span class="section-num">3.</span> Dashboard Overview
+    <ul>
+      <li>3.1 Summary Statistics</li>
+      <li>3.2 Pending Replenishment Alerts</li>
+      <li>3.3 Petty Cash Funds Table</li>
+      <li>3.4 Recent Transactions</li>
+    </ul>
+  </li>
+  <li><span class="section-num">4.</span> Fund Management
+    <ul>
+      <li>4.1 Adding / Replenishing Fund</li>
+      <li>4.2 Editing a Fund</li>
+      <li>4.3 Deleting a Fund</li>
+    </ul>
+  </li>
+  <li><span class="section-num">5.</span> Expense Management
+    <ul>
+      <li>5.1 Creating an Expense</li>
+      <li>5.2 Viewing Expense History</li>
+      <li>5.3 Editing an Expense</li>
+      <li>5.4 Deleting an Expense</li>
+    </ul>
+  </li>
+  <li><span class="section-num">6.</span> Replenishment Requests
+    <ul>
+      <li>6.1 Creating a Replenishment Request</li>
+      <li>6.2 Approving / Rejecting Requests</li>
+      <li>6.3 Disbursing a Replenishment</li>
+    </ul>
+  </li>
+  <li><span class="section-num">7.</span> Replenishment Reports (Liquidation)
+    <ul>
+      <li>7.1 Creating a Replenishment Report</li>
+      <li>7.2 Viewing a Report</li>
+      <li>7.3 Editing a Report</li>
+      <li>7.4 Exporting to Excel</li>
+      <li>7.5 Printing a Report</li>
+    </ul>
+  </li>
+  <li><span class="section-num">8.</span> Workflow Summary
+    <ul>
+      <li>8.1 Complete Petty Cash Cycle</li>
+      <li>8.2 30% Threshold Auto-Trigger</li>
+    </ul>
+  </li>
+  <li><span class="section-num">9.</span> Appendix: Default Accounts &amp; Cost Codes</li>
+</ul>
+</div>
+
+<!-- SECTION 1 -->
+<div class="page-break"></div>
+<h1><span class="section-num">1.</span> Introduction</h1>
+
+<h2>1.1 Purpose of the System</h2>
+<p>The <strong>Petty Cash Monitoring System</strong> is a web-based application designed for <strong>L.V. Ledesma Construction, Inc.</strong> to track, manage, and replenish petty cash funds. It provides real-time monitoring of fund balances, automated expense tracking with a 30% threshold alert, replenishment request workflows, and formal liquidation report generation.</p>
+
+<h2>1.2 User Roles</h2>
+<p>The system supports two user roles with different permission levels:</p>
+<table>
+  <tr><th>Role</th><th>Description</th><th>Permissions</th></tr>
+  <tr>
+    <td><strong>Admin</strong></td>
+    <td>Fund custodian / Manager</td>
+    <td>Full access: create/edit/delete funds, expenses, replenishment requests, and reports. Approve/disburse replenishments.</td>
+  </tr>
+  <tr>
+    <td><strong>User</strong></td>
+    <td>Staff / Viewer</td>
+    <td>View-only access to dashboard, funds, expenses, replenishments, and reports. Can create replenishment requests.</td>
+  </tr>
+</table>
+
+<h2>1.3 System Access</h2>
+<p>The system is hosted at: <code>https://petty-cash-monitoring.onrender.com</code></p>
+
+<!-- SECTION 2 -->
+<div class="page-break"></div>
+<h1><span class="section-num">2.</span> Getting Started</h1>
+
+<h2>2.1 Logging In</h2>
+<ol>
+  <li>Navigate to <code>https://petty-cash-monitoring.onrender.com/login</code></li>
+  <li>Enter your <strong>Email Address</strong> and <strong>Password</strong>.</li>
+  <li>Optionally, check <strong>"Remember me"</strong> to stay signed in.</li>
+  <li>Click <strong>"Sign In"</strong>.</li>
+</ol>
+<div class="note"><strong>Note:</strong> If credentials are incorrect, an error message will appear. Contact your administrator if you need an account.</div>
+
+<h2>2.2 Logging Out</h2>
+<p>Click the <strong>"Logout"</strong> button in the top-right corner of the navigation bar. You will be redirected to the login page.</p>
+
+<!-- SECTION 3 -->
+<div class="page-break"></div>
+<h1><span class="section-num">3.</span> Dashboard Overview</h1>
+<p>The Dashboard is the main landing page after login. It provides a complete overview of the petty cash system.</p>
+
+<h2>3.1 Summary Statistics</h2>
+<p>Four key metric cards are displayed at the top:</p>
+<table>
+  <tr><th>Card</th><th>Description</th></tr>
+  <tr><td><strong>Total Funds</strong></td><td>Number of active fund allocations in the system.</td></tr>
+  <tr><td><strong>Total Balance</strong></td><td>Combined available balance across all funds (of the total allocated).</td></tr>
+  <tr><td><strong>Total Spent</strong></td><td>Total amount spent across all funds, with the number of transactions.</td></tr>
+  <tr><td><strong>Pending Alerts</strong></td><td>Number of replenishment requests awaiting approval.</td></tr>
+</table>
+
+<h2>3.2 Pending Replenishment Alerts</h2>
+<p>If there are pending replenishment requests, a yellow-bordered card appears showing:</p>
+<ul>
+  <li>Fund number</li>
+  <li>Requested amount</li>
+  <li>Who triggered the request</li>
+  <li>Date of request</li>
+  <li><strong>Approve</strong> and <strong>Reject</strong> buttons (Admin only)</li>
+</ul>
+
+<h2>3.3 Petty Cash Funds Table</h2>
+<p>Lists all petty cash funds with the following columns:</p>
+<table>
+  <tr><th>Column</th><th>Description</th></tr>
+  <tr><td>Fund</td><td>Fund ID number (e.g., #1)</td></tr>
+  <tr><td>Allocated</td><td>Target fund amount (fixed at &#8369;30,000)</td></tr>
+  <tr><td>Balance</td><td>Current available balance</td></tr>
+  <tr><td>Utilization</td><td>Progress bar showing expense % against the 30% threshold. Color-coded: green (&lt;30%), yellow (30-50%), red (&gt;50%)</td></tr>
+  <tr><td>Status</td><td>Active, To Liquidate, or Pending</td></tr>
+  <tr><td>Actions</td><td>Expense, History, Edit, Delete buttons</td></tr>
+</table>
+<p><strong>Action Buttons:</strong></p>
+<ul>
+  <li><strong>Expense</strong> &mdash; Create a new expense for this fund</li>
+  <li><strong>History</strong> &mdash; View all expenses for this fund</li>
+  <li><strong>Edit</strong> (Admin) &mdash; Edit fund details</li>
+  <li><strong>Delete</strong> (Admin) &mdash; Delete the fund and all its expenses</li>
+  <li><strong>Add Fund (Replenish)</strong> (Admin) &mdash; Opens a modal to add funds to the existing balance</li>
+</ul>
+
+<h2>3.4 Recent Transactions</h2>
+<p>A table showing the 10 most recent expenses across all funds. Columns include: Date, Fund, Payee, Category, Particular, Cost Code, Receipt #, Amount, and Actions (Edit button for Admin).</p>
+
+<!-- SECTION 4 -->
+<div class="page-break"></div>
+<h1><span class="section-num">4.</span> Fund Management</h1>
+
+<h2>4.1 Adding / Replenishing Fund</h2>
+<p>The system maintains a single fund with a target of <strong>&#8369;30,000</strong>.</p>
+<ol>
+  <li>On the Dashboard, click <strong>"Add Fund (Replenish)"</strong>.</li>
+  <li>Enter the <strong>Amount to Add</strong> in the modal.</li>
+  <li>Click <strong>"Create Fund"</strong>.</li>
+</ol>
+<div class="note"><strong>Note:</strong> Adding funds increases the existing fund's current balance. The fund total is maintained at &#8369;30,000.</div>
+
+<h2>4.2 Editing a Fund</h2>
+<ol>
+  <li>On the Dashboard, click <strong>"Edit"</strong> next to the fund.</li>
+  <li>Modify the <strong>Allocation Amount</strong>.</li>
+  <li>Click <strong>"Update Fund"</strong>.</li>
+</ol>
+
+<h2>4.3 Deleting a Fund</h2>
+<ol>
+  <li>On the Dashboard, click <strong>"Delete"</strong> next to the fund.</li>
+  <li>Confirm the deletion in the prompt.</li>
+</ol>
+<div class="warn"><strong>Warning:</strong> Deleting a fund removes all associated expenses permanently.</div>
+
+<!-- SECTION 5 -->
+<div class="page-break"></div>
+<h1><span class="section-num">5.</span> Expense Management</h1>
+
+<h2>5.1 Creating an Expense</h2>
+<ol>
+  <li>From the Dashboard or Fund Expenses page, click <strong>"Expense"</strong> or <strong>"New Expense"</strong>.</li>
+  <li>Fill in the required fields:
+    <ul>
+      <li><strong>Payee Name</strong> (required) &mdash; Who received the payment</li>
+      <li><strong>Category</strong> (required) &mdash; Select from: Supplies, Transportation, Meals, Communication, Office, Maintenance, Other</li>
+      <li><strong>Particular</strong> (optional) &mdash; Description of the expense</li>
+      <li><strong>Cost Code</strong> (required) &mdash; Department or project code (e.g., CC-SUP-001)</li>
+      <li><strong>Amount</strong> (required) &mdash; Expense amount in Philippine Pesos</li>
+      <li><strong>Receipt #</strong> (optional) &mdash; Reference receipt number</li>
+      <li><strong>Date</strong> (required) &mdash; Date of the expense</li>
+    </ul>
+  </li>
+  <li>Click <strong>"Create Expense"</strong>.</li>
+</ol>
+<p>The fund balance is automatically reduced by the expense amount.</p>
+
+<div class="note"><strong>30% Threshold Alert:</strong> When total expenses reach 30% of the fund (&#8369;9,000), you will be automatically redirected to create a replenishment report.</div>
+
+<h2>5.2 Viewing Expense History</h2>
+<p>Click <strong>"History"</strong> on a fund to view all its expenses. The page shows:</p>
+<ul>
+  <li>Summary statistics: Balance, Total Spent, 30% Threshold</li>
+  <li>Full list of expenses with Date, Payee, Category, Particular, Cost Code, Receipt #, Amount, Status, and Actions</li>
+  <li>Each expense shows its status as <strong>Open</strong> (pending liquidation) or <strong>Closed</strong> (included in a report)</li>
+</ul>
+
+<h2>5.3 Editing an Expense</h2>
+<ol>
+  <li>From the expense history or recent transactions, click <strong>"Edit"</strong>.</li>
+  <li>Modify any field. The <strong>Balance Preview</strong> section shows:
+    <ul>
+      <li>Original Amount vs. New Amount</li>
+      <li>Difference: <span style="color:#ee5d50;">+&#8369;X.XX</span> (additional deduction) or <span style="color:#05cd99;">-&#8369;X.XX</span> (returned to fund)</li>
+      <li>Projected Fund Balance after the update</li>
+    </ul>
+  </li>
+  <li>Click <strong>"Update Expense"</strong>.</li>
+</ol>
+
+<h2>5.4 Deleting an Expense</h2>
+<ol>
+  <li>From the expense history, click <strong>"Delete"</strong>.</li>
+  <li>Confirm the deletion. The amount is returned to the fund balance.</li>
+</ol>
+
+<!-- SECTION 6 -->
+<div class="page-break"></div>
+<h1><span class="section-num">6.</span> Replenishment Requests</h1>
+
+<h2>6.1 Creating a Replenishment Request</h2>
+<p>Replenishment requests can be created in two ways:</p>
+<ul>
+  <li><strong>Auto-Triggered:</strong> When expenses reach 30% of the fund (&#8369;9,000), a request is automatically generated.</li>
+  <li><strong>Manual:</strong> Go to Replenishments &gt; <strong>"New Request"</strong>, select a fund, enter the amount, and submit.</li>
+</ul>
+
+<h2>6.2 Approving / Rejecting Requests</h2>
+<p>Admin users can manage pending requests from the Dashboard or Replenishments page:</p>
+<ul>
+  <li><strong>Approve</strong> &mdash; Marks the request as approved, ready for disbursement</li>
+  <li><strong>Reject</strong> &mdash; Rejects the request</li>
+</ul>
+
+<h2>6.3 Disbursing a Replenishment</h2>
+<p>After approval, click <strong>"Disburse"</strong> to:</p>
+<ol>
+  <li>Mark the request as <strong>disbursed</strong></li>
+  <li>Restore the fund balance to &#8369;30,000</li>
+  <li>Set the fund status back to <strong>Active</strong></li>
+</ol>
+<div class="note"><strong>Note:</strong> After disbursement, the fund is ready for a new cycle of expenses and liquidation reports.</div>
+
+<!-- SECTION 7 -->
+<div class="page-break"></div>
+<h1><span class="section-num">7.</span> Replenishment Reports (Liquidation)</h1>
+
+<h2>7.1 Creating a Replenishment Report</h2>
+<ol>
+  <li>Go to <strong>Replenishment Reports</strong> from the sidebar.</li>
+  <li>Click <strong>"New Report"</strong>.</li>
+  <li>Fill in the Report Information:
+    <ul>
+      <li><strong>Project Name</strong> (required)</li>
+      <li><strong>Location</strong> (required)</li>
+      <li><strong>Subject</strong> (required, default: "Petty Cash Replenishment")</li>
+      <li><strong>Period Start / End</strong> (required)</li>
+      <li><strong>Report Date</strong> (required, defaults to today)</li>
+      <li><strong>Cash Received</strong> (required, auto-filled with total liquidation amount)</li>
+      <li><strong>Prepared By / Reviewed By / Verified By</strong> (required)</li>
+    </ul>
+  </li>
+  <li>The <strong>Expense Items</strong> section is auto-populated with all <strong>open</strong> expenses:
+    <ul>
+      <li>Each row shows: Date, Payee, Cost Code, Particulars, Amount</li>
+      <li>Enter a <strong>Voucher No.</strong> (required) for each item</li>
+      <li>Optionally enter a <strong>Reference No.</strong></li>
+    </ul>
+  </li>
+  <li>The footer shows:
+    <ul>
+      <li><strong>Total Liquidated Amount</strong> &mdash; Sum of all expense amounts</li>
+      <li><strong>For Return / (Reimbursement)</strong> &mdash; Cash Received minus Total Liquidated</li>
+    </ul>
+  </li>
+  <li>Click <strong>"Create Report"</strong>.</li>
+</ol>
+<div class="note"><strong>Important:</strong> After creating the report, all included expenses are marked as "Closed" and will not appear in future reports.</div>
+
+<h2>7.2 Viewing a Report</h2>
+<p>Click <strong>"View"</strong> on any report in the list. The report displays:</p>
+<ul>
+  <li>Company header: <strong>L.V. LEDESMA CONSTRUCTION, INC.</strong></li>
+  <li>Report details: Project, Location, Subject, Period, Date</li>
+  <li>Liquidation section with Cash Received</li>
+  <li>Itemized expense table grouped by Cost Code and Particulars</li>
+  <li>Total Liquidated Amount and For Return / (Reimbursement)</li>
+  <li>Signature blocks: Prepared By, Reviewed By, Verified By</li>
+</ul>
+
+<h2>7.3 Editing a Report</h2>
+<p>Admin users can click <strong>"Edit"</strong> on the report view page to modify report details and expense items.</p>
+
+<h2>7.4 Exporting to Excel</h2>
+<p>Click <strong>"Download Excel"</strong> on the report view page. An <code>.xls</code> file is generated containing:</p>
+<ul>
+  <li>Company header and report information</li>
+  <li>Liquidation table with all expense items</li>
+  <li>Total Liquidated Amount and For Return / (Reimbursement)</li>
+  <li>Signature lines</li>
+</ul>
+
+<h2>7.5 Printing a Report</h2>
+<p>Click the <strong>"Print"</strong> button on the report view page. The report is formatted for A4 paper with a clean, professional layout. The navigation bar is hidden in print view.</p>
+
+<!-- SECTION 8 -->
+<div class="page-break"></div>
+<h1><span class="section-num">8.</span> Workflow Summary</h1>
+
+<h2>8.1 Complete Petty Cash Cycle</h2>
+<ol>
+  <li><strong>Fund Setup:</strong> Admin creates/replenishes the petty cash fund (&#8369;30,000 target).</li>
+  <li><strong>Record Expenses:</strong> Staff/Admin log expenses as they occur (payee, category, cost code, amount).</li>
+  <li><strong>30% Threshold:</strong> When total expenses reach &#8369;9,000 (30%), a replenishment request is auto-triggered and the user is redirected to create a liquidation report.</li>
+  <li><strong>Replenishment Request:</strong> Admin approves and disburses the request, restoring the fund to &#8369;30,000.</li>
+  <li><strong>Liquidation Report:</strong> Admin creates a formal report listing all open expenses. After creation, those expenses are marked as "Closed".</li>
+  <li><strong>Export / Print:</strong> The report can be downloaded as Excel or printed for physical filing.</li>
+  <li><strong>Cycle Repeats:</strong> The fund is restored, and a new cycle begins.</li>
+</ol>
+
+<h2>8.2 30% Threshold Auto-Trigger</h2>
+<p>The system monitors fund utilization in real-time. When expenses reach or exceed 30% of the &#8369;30,000 fund:</p>
+<ul>
+  <li>A <strong>Replenishment Request</strong> is automatically created (if no pending request exists)</li>
+  <li>The user is <strong>redirected to create a Replenishment Report</strong></li>
+  <li>The fund status changes to <strong>"To Liquidate"</strong></li>
+</ul>
+
+<!-- SECTION 9 -->
+<h1><span class="section-num">9.</span> Appendix: Default Cost Codes</h1>
+<p>The system uses the following cost code categories (as configured during setup):</p>
+<table>
+  <tr><th>Code</th><th>Category</th></tr>
+  <tr><td>CC-SUP-001</td><td>Supplies</td></tr>
+  <tr><td>CC-TRA-002</td><td>Transportation</td></tr>
+  <tr><td>CC-MEA-003</td><td>Meals</td></tr>
+  <tr><td>CC-COM-004</td><td>Communication</td></tr>
+  <tr><td>CC-OFF-005</td><td>Office</td></tr>
+</table>
+<div class="note"><strong>Note:</strong> Cost codes are free-text fields. Users can enter any alphanumeric code as needed for their organization.</div>
+
+<div class="footer">
+  Petty Cash Monitoring System &mdash; User Manual v1.0 &mdash; L.V. Ledesma Construction, Inc. &mdash; July 2026
+</div>
+
+</body>
+</html>

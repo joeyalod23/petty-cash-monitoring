@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Support\Sheets\SheetModel;
+use App\Support\Sheets\SheetQuery;
 
-class ReplenishmentReport extends Model
+class ReplenishmentReport extends SheetModel
 {
-    protected $fillable = [
+    protected array $fillable = [
         'project_name',
         'location',
         'subject',
@@ -20,21 +20,21 @@ class ReplenishmentReport extends Model
         'verified_by',
     ];
 
-    protected $casts = [
+    protected array $casts = [
         'period_start' => 'date',
         'period_end' => 'date',
         'report_date' => 'date',
         'cash_received' => 'decimal:2',
     ];
 
-    public function items(): HasMany
+    public function items(): SheetQuery
     {
-        return $this->hasMany(ReplenishmentItem::class, 'replenishment_report_id');
+        return ReplenishmentItem::query()->where('replenishment_report_id', $this->id);
     }
 
     public function getTotalLiquidatedAttribute(): float
     {
-        return (float) $this->items()->sum('amount');
+        return $this->items()->sum('amount');
     }
 
     public function getForReturnAttribute(): float

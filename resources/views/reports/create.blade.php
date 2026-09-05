@@ -89,7 +89,7 @@
                 </div>
                 <div class="form-group">
                     <label for="verified_by">Verified By</label>
-                    <input type="text" name="verified_by" id="verified_by" class="form-control" value="{{ old('verified_by') }}" required placeholder="Name">
+                    <input type="text" name="verified_by" id="verified_by" class="form-control" value="{{ old('verified_by') }}" placeholder="Name (optional)">
                     @error('verified_by')
                         <div style="color:var(--danger);font-size:0.8rem;margin-top:6px;">{{ $message }}</div>
                     @enderror

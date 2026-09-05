@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @php
-    $fundTarget = 30000;
+    $fundTarget = (float) config('pettycash.fund_target', 30000);
     $totalAllocated = $fundTarget * max($funds->count(), 1);
     $totalBalance = $funds->sum('current_balance');
     $totalExpenses = $totalAllocated - $totalBalance;
@@ -134,7 +134,7 @@
             <tbody>
                 @foreach($funds as $fund)
                 @php
-                    $fundTarget = 30000;
+                    $fundTarget = (float) config('pettycash.fund_target', 30000);
                     $totalFundExpenses = $fundTarget - $fund->current_balance;
                     $expensePct = $fundTarget > 0 ? ($totalFundExpenses / $fundTarget) * 100 : 0;
                     $fillClass = $expensePct > 50 ? 'red' : ($expensePct > 30 ? 'yellow' : 'green');
@@ -239,8 +239,8 @@
 <div id="createFundModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
     <div style="background:var(--surface);border-radius:var(--radius);width:100%;max-width:440px;box-shadow:var(--shadow-lg);overflow:hidden;">
         <div style="padding:24px 28px 0;">
-            <h3 style="font-size:1.05rem;font-weight:700;">Add Fund (Replenish to ₱30,000)</h3>
-            <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">Amount to add to the existing fund. Fund total is maintained at ₱30,000.</p>
+            <h3 style="font-size:1.05rem;font-weight:700;">Add Fund (Replenish to ₱{{ number_format(config('pettycash.fund_target', 30000), 2) }})</h3>
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">Amount to add to the existing fund. Fund total is maintained at ₱{{ number_format(config('pettycash.fund_target', 30000), 2) }}.</p>
         </div>
         <form action="{{ route('funds.store') }}" method="POST" style="padding:20px 28px 24px;">
             @csrf

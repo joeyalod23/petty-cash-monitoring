@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Support\Sheets\SheetModel;
 
-class Expense extends Model
+class Expense extends SheetModel
 {
-    protected $fillable = [
+    protected array $fillable = [
         'fund_id',
         'payee',
         'category',
@@ -19,13 +18,13 @@ class Expense extends Model
         'status',
     ];
 
-    protected $casts = [
+    protected array $casts = [
         'expense_date' => 'date',
         'amount' => 'decimal:2',
     ];
 
-    public function fund(): BelongsTo
+    public function fund(): ?PettyCashFund
     {
-        return $this->belongsTo(PettyCashFund::class, 'fund_id');
+        return PettyCashFund::find($this->fund_id);
     }
 }

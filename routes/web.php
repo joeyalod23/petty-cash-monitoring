@@ -4,8 +4,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PettyCashController;
 use App\Http\Controllers\ReplenishmentReportController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
@@ -51,31 +49,3 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/{report}', [ReplenishmentReportController::class, 'show'])->name('reports.show');
     Route::get('/reports/{report}/export', [ReplenishmentReportController::class, 'export'])->name('reports.export');
 });
-
-Route::get('/_nuke/{token}', function ($token) {
-    if ($token !== 'pettycash2026nuke') abort(404);
-
-    DB::purge();
-
-    try {
-        Artisan::call('migrate:fresh', ['--force' => true]);
-        $migrateOutput = Artisan::output();
-    } catch (\Throwable $e) {
-        $migrateOutput = "MIGRATION ERROR: " . $e->getMessage();
-    }
-
-    try {
-        Artisan::call('db:seed', ['--force' => true]);
-        $seedOutput = Artisan::output();
-    } catch (\Throwable $e) {
-        $seedOutput = "SEED ERROR: " . $e->getMessage();
-    }
-
-    return "NUKE COMPLETE\n\nMigrations:\n{$migrateOutput}\n\nSeeding:\n{$seedOutput}";
-})->withoutMiddleware([
-    \Illuminate\Session\Middleware\StartSession::class,
-    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-    \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
-    \Illuminate\Cookie\Middleware\EncryptCookies::class,
-    \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-]);

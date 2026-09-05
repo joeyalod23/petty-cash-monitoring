@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Support\Sheets\SheetModel;
 
-class ReplenishmentItem extends Model
+class ReplenishmentItem extends SheetModel
 {
-    protected $fillable = [
+    protected array $fillable = [
         'replenishment_report_id',
         'expense_id',
         'expense_date',
@@ -20,18 +19,18 @@ class ReplenishmentItem extends Model
         'group_key',
     ];
 
-    protected $casts = [
+    protected array $casts = [
         'expense_date' => 'date',
         'amount' => 'decimal:2',
     ];
 
-    public function report(): BelongsTo
+    public function report(): ?ReplenishmentReport
     {
-        return $this->belongsTo(ReplenishmentReport::class, 'replenishment_report_id');
+        return ReplenishmentReport::find($this->replenishment_report_id);
     }
 
-    public function expense(): BelongsTo
+    public function expense(): ?Expense
     {
-        return $this->belongsTo(Expense::class);
+        return $this->expense_id ? Expense::find($this->expense_id) : null;
     }
 }

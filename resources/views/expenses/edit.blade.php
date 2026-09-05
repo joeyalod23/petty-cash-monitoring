@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @php
-    $fundTarget = 30000;
+    $fundTarget = (float) config('pettycash.fund_target', 30000);
     $totalExpenses = $fundTarget - $fund->current_balance;
     $expensePct = $fundTarget > 0 ? ($totalExpenses / $fundTarget) * 100 : 0;
     $fillClass = $expensePct > 50 ? 'red' : ($expensePct > 30 ? 'yellow' : 'green');

@@ -63,7 +63,8 @@ return [
 
     'providers' => [
         'users' => [
-            'driver' => 'eloquent',
+            // Backed by the Google Sheets "users" worksheet.
+            'driver' => 'sheets',
             'model' => env('AUTH_MODEL', User::class),
         ],
 

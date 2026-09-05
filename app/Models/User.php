@@ -2,29 +2,22 @@
 
 namespace App\Models;
 
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use App\Support\Sheets\SheetModel;
+use Illuminate\Auth\Authenticatable as AuthenticatableTrait;
+use Illuminate\Contracts\Auth\Authenticatable;
 
-#[Fillable(['name', 'email', 'password', 'role'])]
-#[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends SheetModel implements Authenticatable
 {
-    use HasFactory, Notifiable;
+    use AuthenticatableTrait;
 
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected array $fillable = ['name', 'email', 'password', 'role'];
+
+    protected array $casts = [
+        'email_verified_at' => 'datetime',
+    ];
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return ($this->role ?? 'user') === 'admin';
     }
 }

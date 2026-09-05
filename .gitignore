@@ -21,9 +21,11 @@
 /storage/*.key
 /storage/pail
 /vendor
+/composer.phar
+/composer-setup.php
+/storage/framework/locks/
 _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
-composer.lock
-package-lock.json
+/database/database.sqlite

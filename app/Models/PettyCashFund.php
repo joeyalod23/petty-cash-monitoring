@@ -2,25 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Support\Sheets\SheetModel;
+use App\Support\Sheets\SheetQuery;
 
-class PettyCashFund extends Model
+class PettyCashFund extends SheetModel
 {
-    protected $fillable = [
+    protected array $fillable = [
         'total_amount',
         'current_balance',
         'status',
     ];
 
-    public function expenses(): HasMany
+    protected array $casts = [
+        'total_amount' => 'decimal:2',
+        'current_balance' => 'decimal:2',
+    ];
+
+    public function expenses(): SheetQuery
     {
-        return $this->hasMany(Expense::class, 'fund_id');
+        return Expense::query()->where('fund_id', $this->id);
     }
 
-    public function replenishmentRequests(): HasMany
+    public function replenishmentRequests(): SheetQuery
     {
-        return $this->hasMany(ReplenishmentRequest::class, 'fund_id');
+        return ReplenishmentRequest::query()->where('fund_id', $this->id);
     }
 
     public function getThresholdAttribute(): float
@@ -30,7 +35,7 @@ class PettyCashFund extends Model
 
     public function getBalancePercentageAttribute(): float
     {
-        if ($this->total_amount <= 0) {
+        if ((float) $this->total_amount <= 0) {
             return 0;
         }
 
@@ -39,8 +44,7 @@ class PettyCashFund extends Model
 
     public function isBelowThreshold(): bool
     {
-        $totalExpenses = (float) $this->total_amount - (float) $this->current_balance;
-        return $totalExpenses >= $this->threshold;
+        return $this->getTotalExpensesAttribute() >= $this->threshold;
     }
 
     public function getTotalExpensesAttribute(): float

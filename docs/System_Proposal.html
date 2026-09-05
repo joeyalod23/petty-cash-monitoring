@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>System Proposal - Petty Cash Monitoring System</title>
+<style>
+  @page { size: A4; margin: 20mm 18mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; color: #1b2559; line-height: 1.7; }
+  .cover { page-break-after: always; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 90vh; text-align: center; }
+  .cover-logo { width: 80px; height: 80px; background: #4318ff; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 30px; }
+  .cover-logo span { color: #fff; font-size: 32px; font-weight: 800; }
+  .cover h1 { font-size: 26pt; font-weight: 800; color: #1b2559; margin-bottom: 8px; }
+  .cover h2 { font-size: 14pt; font-weight: 500; color: #68769f; margin-bottom: 40px; }
+  .cover-meta { font-size: 10pt; color: #68769f; line-height: 2.2; }
+  .cover-meta strong { color: #1b2559; }
+  h1 { font-size: 16pt; font-weight: 800; color: #1b2559; border-bottom: 3px solid #4318ff; padding-bottom: 6px; margin: 30px 0 14px 0; }
+  h2 { font-size: 12pt; font-weight: 700; color: #4318ff; margin: 20px 0 8px 0; }
+  h3 { font-size: 11pt; font-weight: 700; color: #1b2559; margin: 14px 0 6px 0; }
+  p, li { font-size: 10.5pt; margin-bottom: 5px; }
+  ul, ol { padding-left: 22px; margin-bottom: 10px; }
+  li { margin-bottom: 3px; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 10pt; }
+  th { background: #1b2559; color: #fff; padding: 7px 10px; text-align: left; font-weight: 600; }
+  td { padding: 6px 10px; border-bottom: 1px solid #e5e8ed; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  .note { background: #f0f4ff; border-left: 4px solid #4318ff; padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 10pt; }
+  .page-break { page-break-before: always; }
+  code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 9.5pt; font-family: 'Consolas', monospace; }
+  .section-num { color: #4318ff; font-weight: 700; margin-right: 6px; }
+  .toc a { text-decoration: none; color: #1b2559; }
+  .toc ul { list-style: none; padding-left: 0; }
+  .toc li { padding: 4px 0; border-bottom: 1px dotted #e5e8ed; }
+  .toc li li { padding-left: 20px; border-bottom: none; }
+  .footer { text-align: center; font-size: 8pt; color: #a3aed0; margin-top: 40px; border-top: 1px solid #e5e8ed; padding-top: 10px; }
+  .diagram { background: #f8fafc; border: 1px solid #e5e8ed; border-radius: 12px; padding: 20px; margin: 16px 0; text-align: center; font-size: 10pt; }
+  .diagram-box { display: inline-block; background: #4318ff; color: #fff; padding: 8px 16px; border-radius: 8px; font-weight: 600; margin: 4px; font-size: 9.5pt; }
+  .diagram-arrow { display: inline-block; color: #68769f; font-size: 14pt; margin: 0 4px; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <div class="cover-logo"><span>PC</span></div>
+  <h1>Petty Cash Monitoring System</h1>
+  <h2>System Proposal</h2>
+  <div class="cover-meta">
+    <strong>Prepared for:</strong> L.V. Ledesma Construction, Inc.<br>
+    <strong>Project Location:</strong> Uptown Cagayan De Oro<br>
+    <strong>Version:</strong> 1.0<br>
+    <strong>Date:</strong> July 2026<br>
+    <strong>Prepared by:</strong> Francis Joey Alod
+  </div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<h1>Table of Contents</h1>
+<div class="toc">
+<ul>
+  <li><span class="section-num">1.</span> Executive Summary</li>
+  <li><span class="section-num">2.</span> Problem Statement</li>
+  <li><span class="section-num">3.</span> Proposed Solution</li>
+  <li><span class="section-num">4.</span> Objectives
+    <ul>
+      <li>4.1 General Objective</li>
+      <li>4.2 Specific Objectives</li>
+    </ul>
+  </li>
+  <li><span class="section-num">5.</span> Scope and Limitations</li>
+  <li><span class="section-num">6.</span> System Features and Functionality
+    <ul>
+      <li>6.1 Authentication and User Roles</li>
+      <li>6.2 Dashboard</li>
+      <li>6.3 Fund Management</li>
+      <li>6.4 Expense Tracking</li>
+      <li>6.5 Replenishment Workflow</li>
+      <li>6.6 Liquidation Reports</li>
+      <li>6.7 Excel Export and Printing</li>
+    </ul>
+  </li>
+  <li><span class="section-num">7.</span> System Architecture
+    <ul>
+      <li>7.1 Technology Stack</li>
+      <li>7.2 Database Schema</li>
+      <li>7.3 Deployment Architecture</li>
+    </ul>
+  </li>
+  <li><span class="section-num">8.</span> System Workflow</li>
+  <li><span class="section-num">9.</span> User Interface Design</li>
+  <li><span class="section-num">10.</span> Security Considerations</li>
+  <li><span class="section-num">11.</span> Project Timeline</li>
+  <li><span class="section-num">12.</span> Cost Analysis</li>
+  <li><span class="section-num">13.</span> Conclusion and Recommendation</li>
+</ul>
+</div>
+
+<!-- SECTION 1 -->
+<div class="page-break"></div>
+<h1><span class="section-num">1.</span> Executive Summary</h1>
+<p>This proposal presents the design and development of a <strong>Petty Cash Monitoring System</strong> for <strong>L.V. Ledesma Construction, Inc.</strong> The system addresses the challenges of manually tracking petty cash funds, expenses, and liquidation processes by providing a centralized, web-based platform with automated monitoring, threshold alerts, and formal report generation.</p>
+<p>The system maintains a fixed petty cash fund of <strong>&#8369;30,000</strong>, automatically tracks expenses against the fund balance, triggers replenishment alerts at 30% utilization, and generates formal liquidation reports exportable to Excel. It is built using <strong>Laravel 13</strong> (PHP), <strong>PostgreSQL</strong>, and is deployed on <strong>Render</strong> for cloud accessibility.</p>
+
+<!-- SECTION 2 -->
+<h1><span class="section-num">2.</span> Problem Statement</h1>
+<p>Construction companies like L.V. Ledesma Construction, Inc. commonly manage petty cash funds for day-to-day operational expenses such as supplies, transportation, meals, and communication. The current manual process presents several challenges:</p>
+<ul>
+  <li><strong>Lack of Real-Time Visibility:</strong> Fund balances and expense totals are not easily trackable, leading to overspending or delayed replenishment.</li>
+  <li><strong>Manual Record-Keeping:</strong> Paper-based or spreadsheet tracking is prone to errors, data loss, and duplication.</li>
+  <li><strong>Delayed Liquidation:</strong> Without automated alerts, liquidation reports are often prepared late, causing discrepancies in fund reconciliation.</li>
+  <li><strong>No Audit Trail:</strong> Manual systems lack proper logging of who created, modified, or approved transactions.</li>
+  <li><strong>Inefficient Replenishment:</strong> The process of requesting, approving, and disbursing replenishment funds is slow and lacks transparency.</li>
+</ul>
+
+<!-- SECTION 3 -->
+<h1><span class="section-num">3.</span> Proposed Solution</h1>
+<p>A <strong>web-based Petty Cash Monitoring System</strong> that provides:</p>
+<ul>
+  <li>Real-time fund balance tracking with a fixed &#8369;30,000 target</li>
+  <li>Automated expense recording with balance deduction</li>
+  <li>30% threshold auto-trigger for replenishment requests</li>
+  <li>Multi-step replenishment workflow (Request &rarr; Approve &rarr; Disburse)</li>
+  <li>Formal liquidation report generation with grouped expense items</li>
+  <li>Excel export and print-ready report formatting</li>
+  <li>Role-based access control (Admin / User)</li>
+</ul>
+
+<!-- SECTION 4 -->
+<div class="page-break"></div>
+<h1><span class="section-num">4.</span> Objectives</h1>
+
+<h2>4.1 General Objective</h2>
+<p>To develop a web-based petty cash monitoring system that automates fund tracking, expense management, replenishment workflows, and liquidation reporting for L.V. Ledesma Construction, Inc.</p>
+
+<h2>4.2 Specific Objectives</h2>
+<ol>
+  <li>Implement a centralized fund management system with a fixed &#8369;30,000 petty cash target.</li>
+  <li>Enable real-time expense recording with automatic fund balance updates.</li>
+  <li>Provide automated 30% threshold alerts that trigger replenishment report creation.</li>
+  <li>Develop a multi-step replenishment workflow with approval and disbursement tracking.</li>
+  <li>Generate formal liquidation reports with grouped expense items and signature blocks.</li>
+  <li>Support Excel export and print formatting for physical filing requirements.</li>
+  <li>Implement role-based access control to ensure proper authorization.</li>
+  <li>Maintain a complete audit trail of all financial transactions.</li>
+</ol>
+
+<!-- SECTION 5 -->
+<h1><span class="section-num">5.</span> Scope and Limitations</h1>
+
+<h2>Scope</h2>
+<ul>
+  <li>Petty cash fund creation, replenishment, and balance management</li>
+  <li>Expense recording with payee, category, cost code, particular, amount, and date</li>
+  <li>Automated 30% threshold detection and replenishment request generation</li>
+  <li>Replenishment request workflow: Create &rarr; Approve/Reject &rarr; Disburse</li>
+  <li>Liquidation report creation with auto-populated expense items</li>
+  <li>Expense status tracking (Open/Closed) linked to liquidation reports</li>
+  <li>Excel export of liquidation reports</li>
+  <li>Print-ready report formatting</li>
+  <li>User authentication and role-based access (Admin, User)</li>
+</ul>
+
+<h2>Limitations</h2>
+<ul>
+  <li>Single-fund system (one &#8369;30,000 fund at a time)</li>
+  <li>No multi-currency support</li>
+  <li>No email/notification system (alerts are in-app only)</li>
+  <li>No mobile app (responsive web only)</li>
+  <li>No integration with accounting software</li>
+  <li>No receipt image upload</li>
+</ul>
+
+<!-- SECTION 6 -->
+<div class="page-break"></div>
+<h1><span class="section-num">6.</span> System Features and Functionality</h1>
+
+<h2>6.1 Authentication and User Roles</h2>
+<table>
+  <tr><th>Feature</th><th>Admin</th><th>User</th></tr>
+  <tr><td>View Dashboard</td><td>Yes</td><td>Yes</td></tr>
+  <tr><td>Create/Edit/Delete Funds</td><td>Yes</td><td>No</td></tr>
+  <tr><td>Create Expenses</td><td>Yes</td><td>Yes</td></tr>
+  <tr><td>Edit/Delete Expenses</td><td>Yes</td><td>No</td></tr>
+  <tr><td>Create Replenishment Requests</td><td>Yes</td><td>Yes</td></tr>
+  <tr><td>Approve/Reject/Disburse Replenishments</td><td>Yes</td><td>No</td></tr>
+  <tr><td>Create/Edit/Delete Reports</td><td>Yes</td><td>No</td></tr>
+  <tr><td>View Reports</td><td>Yes</td><td>Yes</td></tr>
+  <tr><td>Export/Print Reports</td><td>Yes</td><td>Yes</td></tr>
+</table>
+
+<h2>6.2 Dashboard</h2>
+<p>The dashboard provides a real-time overview including:</p>
+<ul>
+  <li>Four key metric cards: Total Funds, Total Balance, Total Spent, Pending Alerts</li>
+  <li>Pending replenishment requests table with Approve/Reject actions</li>
+  <li>Petty Cash Funds table with utilization progress bars and status badges</li>
+  <li>Recent Transactions table (10 most recent expenses)</li>
+  <li>Add Fund (Replenish) modal for quick fund additions</li>
+</ul>
+
+<h2>6.3 Fund Management</h2>
+<ul>
+  <li><strong>Target Balance:</strong> Fixed at &#8369;30,000</li>
+  <li><strong>Add Fund:</strong> Increases current balance (replenishment)</li>
+  <li><strong>Utilization Tracking:</strong> Progress bar with color-coded thresholds (green &lt;30%, yellow 30-50%, red &gt;50%)</li>
+  <li><strong>Status Tracking:</strong> Active, To Liquidate, Pending</li>
+</ul>
+
+<h2>6.4 Expense Tracking</h2>
+<ul>
+  <li>Fields: Payee, Category, Particular, Cost Code, Amount, Receipt #, Date</li>
+  <li>Real-time fund balance deduction upon expense creation</li>
+  <li>Balance Preview on edit showing +/- difference and projected fund balance</li>
+  <li>Expense status: Open (pending liquidation) / Closed (included in report)</li>
+</ul>
+
+<h2>6.5 Replenishment Workflow</h2>
+<div class="diagram">
+  <span class="diagram-box">30% Threshold Hit</span>
+  <span class="diagram-arrow">&rarr;</span>
+  <span class="diagram-box">Auto-Request Created</span>
+  <span class="diagram-arrow">&rarr;</span>
+  <span class="diagram-box">Admin Approves</span>
+  <span class="diagram-arrow">&rarr;</span>
+  <span class="diagram-box">Admin Disburses</span>
+  <span class="diagram-arrow">&rarr;</span>
+  <span class="diagram-box">Fund Restored to &#8369;30,000</span>
+</div>
+<ul>
+  <li>Auto-triggered when total expenses &ge; &#8369;9,000 (30% of &#8369;30,000)</li>
+  <li>Manual creation available via Replenishments page</li>
+  <li>Status flow: Pending &rarr; Approved &rarr; Disbursed (or Rejected)</li>
+  <li>Disbursement restores fund balance to &#8369;30,000</li>
+</ul>
+
+<h2>6.6 Liquidation Reports</h2>
+<ul>
+  <li>Auto-populated with all open expenses</li>
+  <li>Cash Received auto-filled with total liquidation amount</li>
+  <li>Items grouped by Cost Code and Particulars in the report view</li>
+  <li>For Return / (Reimbursement) auto-calculated</li>
+  <li>After creation, included expenses are marked as "Closed"</li>
+  <li>Signature blocks for Prepared By, Reviewed By, Verified By</li>
+</ul>
+
+<h2>6.7 Excel Export and Printing</h2>
+<ul>
+  <li>Download as <code>.xls</code> file with company header, itemized table, totals, and signatures</li>
+  <li>Print-ready formatting optimized for A4 paper</li>
+  <li>Navigation bar hidden in print view</li>
+</ul>
+
+<!-- SECTION 7 -->
+<div class="page-break"></div>
+<h1><span class="section-num">7.</span> System Architecture</h1>
+
+<h2>7.1 Technology Stack</h2>
+<table>
+  <tr><th>Layer</th><th>Technology</th></tr>
+  <tr><td>Backend Framework</td><td>Laravel 13.21 (PHP 8.3)</td></tr>
+  <tr><td>Database</td><td>PostgreSQL (Render Managed)</td></tr>
+  <tr><td>Frontend</td><td>Blade Templates, HTML5, CSS3, Vanilla JavaScript</td></tr>
+  <tr><td>Authentication</td><td>Laravel Breeze / Built-in Auth</td></tr>
+  <tr><td>Hosting</td><td>Render (PaaS)</td></tr>
+  <tr><td>Version Control</td><td>GitHub</td></tr>
+  <tr><td>Font</td><td>Inter (Google Fonts)</td></tr>
+</table>
+
+<h2>7.2 Database Schema</h2>
+<p>Core tables and their relationships:</p>
+
+<h3>users</h3>
+<table>
+  <tr><th>Column</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>BIGINT (PK)</td><td>User identifier</td></tr>
+  <tr><td>name</td><td>VARCHAR(255)</td><td>Full name</td></tr>
+  <tr><td>email</td><td>VARCHAR(255)</td><td>Email (unique)</td></tr>
+  <tr><td>password</td><td>VARCHAR(255)</td><td>Hashed password</td></tr>
+  <tr><td>role</td><td>VARCHAR(20)</td><td>"admin" or "user"</td></tr>
+</table>
+
+<h3>petty_cash_funds</h3>
+<table>
+  <tr><th>Column</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>BIGINT (PK)</td><td>Fund identifier</td></tr>
+  <tr><td>total_amount</td><td>DECIMAL(10,2)</td><td>Target allocation (&#8369;30,000)</td></tr>
+  <tr><td>current_balance</td><td>DECIMAL(10,2)</td><td>Available balance</td></tr>
+  <tr><td>status</td><td>VARCHAR(30)</td><td>active / low_balance / replenishment_pending</td></tr>
+  <tr><td>timestamps</td><td>TIMESTAMP</td><td>created_at, updated_at</td></tr>
+</table>
+
+<h3>expenses</h3>
+<table>
+  <tr><th>Column</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>BIGINT (PK)</td><td>Expense identifier</td></tr>
+  <tr><td>fund_id</td><td>BIGINT (FK)</td><td>References petty_cash_funds.id</td></tr>
+  <tr><td>payee</td><td>VARCHAR(255)</td><td>Payee name</td></tr>
+  <tr><td>category</td><td>VARCHAR(100)</td><td>Expense category</td></tr>
+  <tr><td>particular</td><td>VARCHAR(255)</td><td>Description (nullable)</td></tr>
+  <tr><td>cost_code</td><td>VARCHAR(100)</td><td>Department/project code</td></tr>
+  <tr><td>amount</td><td>DECIMAL(10,2)</td><td>Expense amount</td></tr>
+  <tr><td>receipt_number</td><td>VARCHAR(100)</td><td>Receipt reference (nullable)</td></tr>
+  <tr><td>expense_date</td><td>DATE</td><td>Date of expense</td></tr>
+  <tr><td>status</td><td>VARCHAR(20)</td><td>open / closed</td></tr>
+  <tr><td>timestamps</td><td>TIMESTAMP</td><td>created_at, updated_at</td></tr>
+</table>
+
+<h3>replenishment_requests</h3>
+<table>
+  <tr><th>Column</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>BIGINT (PK)</td><td>Request identifier</td></tr>
+  <tr><td>fund_id</td><td>BIGINT (FK)</td><td>References petty_cash_funds.id</td></tr>
+  <tr><td>requested_amount</td><td>DECIMAL(10,2)</td><td>Amount requested</td></tr>
+  <tr><td>status</td><td>VARCHAR(20)</td><td>pending / approved / disbursed / rejected</td></tr>
+  <tr><td>triggered_by</td><td>TEXT</td><td>Auto-trigger description or "Manual Request"</td></tr>
+  <tr><td>timestamps</td><td>TIMESTAMP</td><td>created_at, updated_at</td></tr>
+</table>
+
+<h3>replenishment_reports</h3>
+<table>
+  <tr><th>Column</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>BIGINT (PK)</td><td>Report identifier</td></tr>
+  <tr><td>project_name</td><td>VARCHAR(255)</td><td>Project name</td></tr>
+  <tr><td>location</td><td>VARCHAR(255)</td><td>Project location</td></tr>
+  <tr><td>subject</td><td>VARCHAR(255)</td><td>Report subject</td></tr>
+  <tr><td>period_start</td><td>DATE</td><td>Reporting period start</td></tr>
+  <tr><td>period_end</td><td>DATE</td><td>Reporting period end</td></tr>
+  <tr><td>report_date</td><td>DATE</td><td>Date report was created</td></tr>
+  <tr><td>cash_received</td><td>DECIMAL(10,2)</td><td>Initial cash amount</td></tr>
+  <tr><td>prepared_by</td><td>VARCHAR(255)</td><td>Prepared by name</td></tr>
+  <tr><td>reviewed_by</td><td>VARCHAR(255)</td><td>Reviewed by name</td></tr>
+  <tr><td>verified_by</td><td>VARCHAR(255)</td><td>Verified by name</td></tr>
+  <tr><td>timestamps</td><td>TIMESTAMP</td><td>created_at, updated_at</td></tr>
+</table>
+
+<h3>replenishment_items</h3>
+<table>
+  <tr><th>Column</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>BIGINT (PK)</td><td>Item identifier</td></tr>
+  <tr><td>replenishment_report_id</td><td>BIGINT (FK)</td><td>References replenishment_reports.id</td></tr>
+  <tr><td>expense_id</td><td>BIGINT (FK)</td><td>References expenses.id (nullable)</td></tr>
+  <tr><td>expense_date</td><td>DATE</td><td>Expense date</td></tr>
+  <tr><td>voucher_no</td><td>VARCHAR(100)</td><td>Voucher number</td></tr>
+  <tr><td>reference_no</td><td>VARCHAR(100)</td><td>Reference number (nullable)</td></tr>
+  <tr><td>payee</td><td>VARCHAR(255)</td><td>Payee name</td></tr>
+  <tr><td>cost_code</td><td>VARCHAR(100)</td><td>Cost code</td></tr>
+  <tr><td>particulars</td><td>VARCHAR(255)</td><td>Particulars/description</td></tr>
+  <tr><td>amount</td><td>DECIMAL(10,2)</td><td>Item amount</td></tr>
+  <tr><td>group_key</td><td>TEXT</td><td>Grouping key for display</td></tr>
+  <tr><td>timestamps</td><td>TIMESTAMP</td><td>created_at, updated_at</td></tr>
+</table>
+
+<h2>7.3 Deployment Architecture</h2>
+<div class="diagram">
+  <span class="diagram-box">User Browser</span>
+  <span class="diagram-arrow">&rarr;</span>
+  <span class="diagram-box">Render (PaaS)</span>
+  <span class="diagram-arrow">&rarr;</span>
+  <span class="diagram-box">Laravel 13 App</span>
+  <span class="diagram-arrow">&rarr;</span>
+  <span class="diagram-box">PostgreSQL DB</span>
+</div>
+<ul>
+  <li><strong>Source Control:</strong> GitHub repository at <code>github.com/joeyalod23/petty-cash-monitoring</code></li>
+  <li><strong>CI/CD:</strong> Automatic deployment on push to master branch</li>
+  <li><strong>Database:</strong> Render-managed PostgreSQL</li>
+  <li><strong>URL:</strong> <code>https://petty-cash-monitoring.onrender.com</code></li>
+</ul>
+
+<!-- SECTION 8 -->
+<div class="page-break"></div>
+<h1><span class="section-num">8.</span> System Workflow</h1>
+
+<h2>8.1 Complete Petty Cash Cycle</h2>
+<div class="diagram">
+  <span class="diagram-box">1. Fund Setup (&#8369;30,000)</span>
+  <span class="diagram-arrow">&rarr;</span>
+  <span class="diagram-box">2. Record Expenses</span>
+  <span class="diagram-arrow">&rarr;</span>
+  <span class="diagram-box">3. 30% Threshold Alert</span>
+  <span class="diagram-arrow">&rarr;</span>
+  <span class="diagram-box">4. Create Liquidation Report</span>
+  <span class="diagram-arrow">&rarr;</span>
+  <span class="diagram-box">5. Approve &amp; Disburse Replenishment</span>
+  <span class="diagram-arrow">&rarr;</span>
+  <span class="diagram-box">6. Fund Restored</span>
+</div>
+
+<h3>Step-by-Step Process:</h3>
+<ol>
+  <li><strong>Fund Initialization:</strong> Admin creates/replenishes the petty cash fund to &#8369;30,000.</li>
+  <li><strong>Expense Recording:</strong> As expenses are incurred, they are logged into the system with payee, category, cost code, amount, and date. The fund balance is automatically reduced.</li>
+  <li><strong>Threshold Monitoring:</strong> The system continuously monitors total expenses. When they reach &#8369;9,000 (30% of &#8369;30,000):
+    <ul>
+      <li>A replenishment request is auto-generated</li>
+      <li>The user is redirected to create a liquidation report</li>
+    </ul>
+  </li>
+  <li><strong>Liquidation Report:</strong> Admin creates a formal report with all open expenses, voucher numbers, and signature blocks. Expenses are marked as "Closed" after report creation.</li>
+  <li><strong>Replenishment Processing:</strong> Admin approves and disburses the replenishment request, restoring the fund to &#8369;30,000.</li>
+  <li><strong>Cycle Reset:</strong> The fund is restored and a new expense cycle begins.</li>
+</ol>
+
+<!-- SECTION 9 -->
+<h1><span class="section-num">9.</span> User Interface Design</h1>
+<p>The system features a modern, professional interface with:</p>
+<ul>
+  <li><strong>Color Scheme:</strong> Dark navy (#1b2559) primary with purple (#4318ff) accent</li>
+  <li><strong>Typography:</strong> Inter font family with monospace for financial figures</li>
+  <li><strong>Layout:</strong> Sidebar navigation with main content area</li>
+  <li><strong>Components:</strong> Cards, data tables, progress bars, status badges, modals, alerts</li>
+  <li><strong>Responsive:</strong> Adapts to desktop, tablet, and mobile screens</li>
+  <li><strong>Dark/Light:</strong> Light theme with high-contrast elements</li>
+  <li><strong>Real-time Clock:</strong> Displayed in the top navigation bar</li>
+</ul>
+
+<!-- SECTION 10 -->
+<div class="page-break"></div>
+<h1><span class="section-num">10.</span> Security Considerations</h1>
+<ul>
+  <li><strong>Authentication:</strong> Laravel's built-in session-based authentication with secure password hashing (bcrypt)</li>
+  <li><strong>Authorization:</strong> Role-based middleware (AdminMiddleware) restricts sensitive operations</li>
+  <li><strong>CSRF Protection:</strong> All forms include CSRF tokens</li>
+  <li><strong>Input Validation:</strong> Server-side validation on all form inputs</li>
+  <li><strong>SQL Injection Prevention:</strong> Eloquent ORM and parameterized queries</li>
+  <li><strong>XSS Prevention:</strong> Blade template auto-escaping of output</li>
+  <li><strong>Database Transactions:</strong> Critical operations wrapped in DB transactions for data integrity</li>
+  <li><strong>Row Locking:</strong> SELECT ... FOR UPDATE on fund balance modifications to prevent race conditions</li>
+  <li><strong>Session Security:</strong> Session regeneration on login, secure cookie handling</li>
+  <li><strong>Environment Variables:</strong> Sensitive configuration stored in <code>.env</code> (not in version control)</li>
+</ul>
+
+<!-- SECTION 11 -->
+<h1><span class="section-num">11.</span> Project Timeline</h1>
+<table>
+  <tr><th>Phase</th><th>Activity</th><th>Duration</th></tr>
+  <tr><td>1</td><td>Requirements Analysis &amp; System Design</td><td>Week 1</td></tr>
+  <tr><td>2</td><td>Database Design &amp; Schema Creation</td><td>Week 1</td></tr>
+  <tr><td>3</td><td>Backend Development (Models, Controllers, Services)</td><td>Week 2-3</td></tr>
+  <tr><td>4</td><td>Frontend Development (Views, UI/UX)</td><td>Week 2-3</td></tr>
+  <tr><td>5</td><td>Testing &amp; Bug Fixing</td><td>Week 3-4</td></tr>
+  <tr><td>6</td><td>Deployment &amp; Documentation</td><td>Week 4</td></tr>
+</table>
+
+<!-- SECTION 12 -->
+<h1><span class="section-num">12.</span> Cost Analysis</h1>
+<table>
+  <tr><th>Item</th><th>Cost</th><th>Notes</th></tr>
+  <tr><td>Render Hosting (Web Service)</td><td>Free Tier / $7/mo</td><td>Automatic deployments from GitHub</td></tr>
+  <tr><td>Render PostgreSQL</td><td>Free Tier / $7/mo</td><td>Managed database</td></tr>
+  <tr><td>Domain (optional)</td><td>~$12/year</td><td>Custom domain mapping</td></tr>
+  <tr><td>Development</td><td>In-house</td><td>Internal development team</td></tr>
+</table>
+
+<!-- SECTION 13 -->
+<h1><span class="section-num">13.</span> Conclusion and Recommendation</h1>
+<p>The proposed Petty Cash Monitoring System provides a comprehensive solution to the challenges of manual petty cash management. By implementing automated fund tracking, threshold alerts, formal liquidation reporting, and role-based access control, the system will significantly improve the efficiency, accuracy, and transparency of petty cash operations at L.V. Ledesma Construction, Inc.</p>
+
+<h3>Recommendations:</h3>
+<ol>
+  <li><strong>Immediate Implementation:</strong> Deploy the system for pilot testing with the current fund custodian.</li>
+  <li><strong>User Training:</strong> Conduct training sessions for all staff who will interact with the system.</li>
+  <li><strong>Feedback Collection:</strong> Gather user feedback after 30 days to identify areas for improvement.</li>
+  <li><strong>Future Enhancements:</strong> Consider adding email notifications, receipt image uploads, multi-fund support, and accounting software integration in future versions.</li>
+</ol>
+
+<div class="footer">
+  Petty Cash Monitoring System &mdash; System Proposal v1.0 &mdash; L.V. Ledesma Construction, Inc. &mdash; July 2026
+</div>
+
+</body>
+</html>

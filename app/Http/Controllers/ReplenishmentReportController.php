@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\ReplenishmentReport;
 use App\Models\ReplenishmentItem;
 use App\Models\Expense;
+use App\Rules\SheetExists;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class ReplenishmentReportController extends Controller
 {
@@ -41,9 +41,9 @@ class ReplenishmentReportController extends Controller
             'cash_received' => 'required|numeric|min:0',
             'prepared_by' => 'required|string|max:255',
             'reviewed_by' => 'required|string|max:255',
-            'verified_by' => 'required|string|max:255',
+            'verified_by' => 'nullable|string|max:255',
             'items' => 'required|array|min:1',
-            'items.*.expense_id' => 'nullable|exists:expenses,id',
+            'items.*.expense_id' => ['nullable', new SheetExists('expenses'),],
             'items.*.expense_date' => 'required|date',
             'items.*.voucher_no' => 'required|string|max:100',
             'items.*.reference_no' => 'nullable|string|max:100',
@@ -53,23 +53,25 @@ class ReplenishmentReportController extends Controller
             'items.*.amount' => 'required|numeric|min:0.01',
         ]);
 
-        $report = DB::transaction(function () use ($validated) {
-            $report = ReplenishmentReport::create([
-                'project_name' => $validated['project_name'],
-                'location' => $validated['location'],
-                'subject' => $validated['subject'],
-                'period_start' => $validated['period_start'],
-                'period_end' => $validated['period_end'],
-                'report_date' => $validated['report_date'],
-                'cash_received' => $validated['cash_received'],
-                'prepared_by' => $validated['prepared_by'],
-                'reviewed_by' => $validated['reviewed_by'],
-                'verified_by' => $validated['verified_by'],
-            ]);
+        $report = ReplenishmentReport::create([
+            'project_name' => $validated['project_name'],
+            'location' => $validated['location'],
+            'subject' => $validated['subject'],
+            'period_start' => $validated['period_start'],
+            'period_end' => $validated['period_end'],
+            'report_date' => $validated['report_date'],
+            'cash_received' => $validated['cash_received'],
+            'prepared_by' => $validated['prepared_by'],
+            'reviewed_by' => $validated['reviewed_by'],
+            'verified_by' => $validated['verified_by'],
+        ]);
 
-            $expenseIds = [];
+        $expenseIds = [];
+
+        try {
             foreach ($validated['items'] as $item) {
-                $report->items()->create([
+                ReplenishmentItem::create([
+                    'replenishment_report_id' => $report->id,
                     'expense_id' => $item['expense_id'] ?? null,
                     'expense_date' => $item['expense_date'],
                     'voucher_no' => $item['voucher_no'],
@@ -80,17 +82,20 @@ class ReplenishmentReportController extends Controller
                     'amount' => $item['amount'],
                     'group_key' => $item['cost_code'] . '|' . $item['particulars'],
                 ]);
+
                 if (!empty($item['expense_id'])) {
                     $expenseIds[] = $item['expense_id'];
                 }
             }
+        } catch (\Throwable $e) {
+            $report->delete();
 
-            if (!empty($expenseIds)) {
-                Expense::whereIn('id', $expenseIds)->update(['status' => 'closed']);
-            }
+            throw $e;
+        }
 
-            return $report;
-        });
+        if (!empty($expenseIds)) {
+            Expense::whereIn('id', $expenseIds)->update(['status' => 'closed']);
+        }
 
         return redirect()->route('reports.show', $report)
             ->with('success', 'Replenishment report created successfully.');
@@ -123,9 +128,9 @@ class ReplenishmentReportController extends Controller
             'cash_received' => 'required|numeric|min:0',
             'prepared_by' => 'required|string|max:255',
             'reviewed_by' => 'required|string|max:255',
-            'verified_by' => 'required|string|max:255',
+            'verified_by' => 'nullable|string|max:255',
             'items' => 'required|array|min:1',
-            'items.*.expense_id' => 'nullable|exists:expenses,id',
+            'items.*.expense_id' => ['nullable', new SheetExists('expenses'),],
             'items.*.expense_date' => 'required|date',
             'items.*.voucher_no' => 'required|string|max:100',
             'items.*.reference_no' => 'nullable|string|max:100',
@@ -135,36 +140,35 @@ class ReplenishmentReportController extends Controller
             'items.*.amount' => 'required|numeric|min:0.01',
         ]);
 
-        DB::transaction(function () use ($validated, $report) {
-            $report->update([
-                'project_name' => $validated['project_name'],
-                'location' => $validated['location'],
-                'subject' => $validated['subject'],
-                'period_start' => $validated['period_start'],
-                'period_end' => $validated['period_end'],
-                'report_date' => $validated['report_date'],
-                'cash_received' => $validated['cash_received'],
-                'prepared_by' => $validated['prepared_by'],
-                'reviewed_by' => $validated['reviewed_by'],
-                'verified_by' => $validated['verified_by'],
+        $report->update([
+            'project_name' => $validated['project_name'],
+            'location' => $validated['location'],
+            'subject' => $validated['subject'],
+            'period_start' => $validated['period_start'],
+            'period_end' => $validated['period_end'],
+            'report_date' => $validated['report_date'],
+            'cash_received' => $validated['cash_received'],
+            'prepared_by' => $validated['prepared_by'],
+            'reviewed_by' => $validated['reviewed_by'],
+            'verified_by' => $validated['verified_by'],
+        ]);
+
+        $report->items()->delete();
+
+        foreach ($validated['items'] as $item) {
+            ReplenishmentItem::create([
+                'replenishment_report_id' => $report->id,
+                'expense_id' => $item['expense_id'] ?? null,
+                'expense_date' => $item['expense_date'],
+                'voucher_no' => $item['voucher_no'],
+                'reference_no' => $item['reference_no'] ?? null,
+                'payee' => $item['payee'],
+                'cost_code' => $item['cost_code'],
+                'particulars' => $item['particulars'],
+                'amount' => $item['amount'],
+                'group_key' => $item['cost_code'] . '|' . $item['particulars'],
             ]);
-
-            $report->items()->delete();
-
-            foreach ($validated['items'] as $item) {
-                $report->items()->create([
-                    'expense_id' => $item['expense_id'] ?? null,
-                    'expense_date' => $item['expense_date'],
-                    'voucher_no' => $item['voucher_no'],
-                    'reference_no' => $item['reference_no'] ?? null,
-                    'payee' => $item['payee'],
-                    'cost_code' => $item['cost_code'],
-                    'particulars' => $item['particulars'],
-                    'amount' => $item['amount'],
-                    'group_key' => $item['cost_code'] . '|' . $item['particulars'],
-                ]);
-            }
-        });
+        }
 
         return redirect()->route('reports.show', $report)
             ->with('success', 'Replenishment report updated successfully.');
@@ -172,6 +176,7 @@ class ReplenishmentReportController extends Controller
 
     public function destroy(ReplenishmentReport $report)
     {
+        $report->items()->delete();
         $report->delete();
 
         return redirect()->route('reports.index')

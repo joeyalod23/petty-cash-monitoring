@@ -5,86 +5,69 @@ namespace App\Services;
 use App\Models\Expense;
 use App\Models\PettyCashFund;
 use App\Models\ReplenishmentRequest;
-use Illuminate\Support\Facades\DB;
 
 class PettyCashService
 {
-    const FUND_TARGET = 30000.00;
+    public static function fundTarget(): float
+    {
+        return (float) config('pettycash.fund_target', 30000.00);
+    }
+
+    public static function lowBalanceThreshold(): float
+    {
+        return (float) config('pettycash.low_balance_threshold', 0.30);
+    }
 
     public function recordExpense(PettyCashFund $fund, array $data): array
     {
-        return DB::transaction(function () use ($fund, $data) {
-            $expenseAmount = number_format((float) $data['amount'], 2, '.', '');
-            $fundTarget = self::FUND_TARGET;
+        return $this->withRowLock($fund->id, function () use ($fund, $data) {
+            $fresh = PettyCashFund::find($fund->id);
 
-            $row = DB::selectOne(
-                'SELECT id, total_amount, current_balance, status FROM petty_cash_funds WHERE id = ? FOR UPDATE',
-                [$fund->id]
-            );
-
-            if (!$row) {
+            if (!$fresh) {
                 throw new \RuntimeException('Fund not found.');
             }
 
-            if ((float) $row->current_balance < (float) $expenseAmount) {
+            $expenseAmount = (float) $data['amount'];
+            $fundTarget = self::fundTarget();
+            $currentBalance = (float) $fresh->current_balance;
+
+            if ($currentBalance < $expenseAmount) {
                 throw new \RuntimeException('Insufficient Petty Cash Balance');
             }
 
-            $newBalance = number_format((float) $row->current_balance - (float) $expenseAmount, 2, '.', '');
-            $threshold = number_format($fundTarget * 0.30, 2, '.', '');
-            $totalExpenses = number_format($fundTarget - (float) $newBalance, 2, '.', '');
-            $shouldTrigger = (float) $totalExpenses >= (float) $threshold;
+            $newBalance = $currentBalance - $expenseAmount;
+            $threshold = $fundTarget * 0.30;
+            $totalExpenses = $fundTarget - $newBalance;
+            $shouldTrigger = $totalExpenses >= $threshold;
 
-            $newStatus = $row->status;
-            if ($shouldTrigger && $row->status !== 'replenishment_pending') {
-                $newStatus = 'low_balance';
+            $fresh->current_balance = $this->round($newBalance);
+            if ($shouldTrigger && $fresh->status !== 'replenishment_pending') {
+                $fresh->status = 'low_balance';
             }
+            $fresh->save();
 
-            DB::update(
-                'UPDATE petty_cash_funds SET current_balance = ?, status = ?, updated_at = NOW() WHERE id = ?',
-                [$newBalance, $newStatus, $row->id]
-            );
-
-            $expenseId = DB::table('expenses')->insertGetId([
-                'fund_id' => $row->id,
+            $expense = Expense::create([
+                'fund_id' => $fresh->id,
                 'payee' => $data['payee'],
                 'category' => $data['category'],
                 'particular' => $data['particular'] ?? null,
                 'cost_code' => $data['cost_code'],
-                'amount' => $expenseAmount,
+                'amount' => $this->round($expenseAmount),
                 'receipt_number' => $data['receipt_number'] ?: null,
                 'expense_date' => $data['expense_date'],
-                'created_at' => now(),
-                'updated_at' => now(),
+                'status' => 'open',
             ]);
 
             if ($shouldTrigger) {
-                $existingPending = DB::selectOne(
-                    'SELECT id FROM replenishment_requests WHERE fund_id = ? AND status = ?',
-                    [$row->id, 'pending']
-                );
-
-                if (!$existingPending) {
-                    $replenishAmount = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
-
-                    DB::insert(
-                        'INSERT INTO replenishment_requests (fund_id, requested_amount, status, triggered_by, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())',
-                        [
-                            $row->id,
-                            $replenishAmount,
-                            'pending',
-                            'System Auto-Trigger (30% Total Expense Alert - To Liquidate & Replenish)',
-                        ]
-                    );
-                }
+                $this->autoTriggerIfPending($fresh, $newBalance);
             }
 
             return [
-                'expense' => Expense::find($expenseId),
-                'current_balance' => (float) $newBalance,
+                'expense' => $expense,
+                'current_balance' => $newBalance,
                 'alert_triggered' => $shouldTrigger,
-                'threshold' => (float) $threshold,
-                'total_expenses' => (float) $totalExpenses,
+                'threshold' => $threshold,
+                'total_expenses' => $totalExpenses,
             ];
         });
     }
@@ -94,16 +77,15 @@ class PettyCashService
         $existingFund = PettyCashFund::first();
 
         if ($existingFund) {
-            $newBalance = number_format((float) $existingFund->current_balance + $totalAmount, 2, '.', '');
-            $existingFund->update([
-                'current_balance' => $newBalance,
-            ]);
+            $existingFund->current_balance = $this->round((float) $existingFund->current_balance + $totalAmount);
+            $existingFund->save();
+
             return $existingFund;
         }
 
         return PettyCashFund::create([
-            'total_amount' => 30000.00,
-            'current_balance' => $totalAmount,
+            'total_amount' => self::fundTarget(),
+            'current_balance' => $this->round($totalAmount),
             'status' => 'active',
         ]);
     }
@@ -111,8 +93,8 @@ class PettyCashService
     public function updateFund(PettyCashFund $fund, float $totalAmount): void
     {
         $fund->update([
-            'total_amount' => $totalAmount,
-            'current_balance' => $totalAmount,
+            'total_amount' => $this->round($totalAmount),
+            'current_balance' => $this->round($totalAmount),
         ]);
     }
 
@@ -123,109 +105,81 @@ class PettyCashService
 
     public function updateExpense(Expense $expense, array $data): void
     {
-        DB::transaction(function () use ($expense, $data) {
+        $this->withRowLock($expense->fund_id, function () use ($expense, $data) {
             $oldAmount = (float) $expense->amount;
             $newAmount = (float) $data['amount'];
             $diff = $newAmount - $oldAmount;
-            $fundTarget = self::FUND_TARGET;
 
-            DB::update(
-                'UPDATE expenses SET payee = ?, category = ?, particular = ?, cost_code = ?, amount = ?, receipt_number = ?, expense_date = ?, updated_at = NOW() WHERE id = ?',
-                [
-                    $data['payee'],
-                    $data['category'],
-                    $data['particular'] ?? null,
-                    $data['cost_code'],
-                    number_format($newAmount, 2, '.', ''),
-                    $data['receipt_number'] ?: null,
-                    $data['expense_date'],
-                    $expense->id,
-                ]
-            );
+            $expense->update([
+                'payee' => $data['payee'],
+                'category' => $data['category'],
+                'particular' => $data['particular'] ?? null,
+                'cost_code' => $data['cost_code'],
+                'amount' => $this->round($newAmount),
+                'receipt_number' => $data['receipt_number'] ?: null,
+                'expense_date' => $data['expense_date'],
+            ]);
 
-            if ($diff != 0) {
-                $row = DB::selectOne(
-                    'SELECT id, total_amount, current_balance, status FROM petty_cash_funds WHERE id = ? FOR UPDATE',
-                    [$expense->fund_id]
-                );
+            if (abs($diff) < 0.005) {
+                return;
+            }
 
-                if ($row) {
-                    $newBalance = number_format((float) $row->current_balance - $diff, 2, '.', '');
-                    $threshold = number_format($fundTarget * 0.30, 2, '.', '');
-                    $totalExpenses = number_format($fundTarget - (float) $newBalance, 2, '.', '');
-                    $shouldTrigger = (float) $totalExpenses >= (float) $threshold;
+            $fresh = PettyCashFund::find($expense->fund_id);
 
-                    $newStatus = $row->status;
-                    if ($shouldTrigger && $row->status !== 'replenishment_pending') {
-                        $newStatus = 'low_balance';
-                    }
+            if (!$fresh) {
+                return;
+            }
 
-                    DB::update(
-                        'UPDATE petty_cash_funds SET current_balance = ?, status = ?, updated_at = NOW() WHERE id = ?',
-                        [$newBalance, $newStatus, $row->id]
-                    );
+            $fundTarget = self::fundTarget();
+            $newBalance = (float) $fresh->current_balance - $diff;
+            $threshold = $fundTarget * 0.30;
+            $totalExpenses = $fundTarget - $newBalance;
+            $shouldTrigger = $totalExpenses >= $threshold;
 
-                    if ($shouldTrigger) {
-                        $existingPending = DB::selectOne(
-                            'SELECT id FROM replenishment_requests WHERE fund_id = ? AND status = ?',
-                            [$row->id, 'pending']
-                        );
+            $fresh->current_balance = $this->round($newBalance);
+            if ($shouldTrigger && $fresh->status !== 'replenishment_pending') {
+                $fresh->status = 'low_balance';
+            }
+            $fresh->save();
 
-                        if (!$existingPending) {
-                            $replenishAmount = number_format((float) $row->total_amount - (float) $newBalance, 2, '.', '');
-
-                            DB::insert(
-                                'INSERT INTO replenishment_requests (fund_id, requested_amount, status, triggered_by, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())',
-                                [
-                                    $row->id,
-                                    $replenishAmount,
-                                    'pending',
-                                    'System Auto-Trigger (30% Total Expense Alert - To Liquidate & Replenish)',
-                                ]
-                            );
-                        }
-                    }
-                }
+            if ($shouldTrigger) {
+                $this->autoTriggerIfPending($fresh, $newBalance);
             }
         });
     }
 
     public function deleteExpense(Expense $expense): void
     {
-        DB::transaction(function () use ($expense) {
+        $this->withRowLock($expense->fund_id, function () use ($expense) {
             $amount = (float) $expense->amount;
+            $fundId = $expense->fund_id;
 
-            DB::delete('DELETE FROM expenses WHERE id = ?', [$expense->id]);
+            $expense->delete();
 
-            $row = DB::selectOne(
-                'SELECT id, total_amount, current_balance, status FROM petty_cash_funds WHERE id = ? FOR UPDATE',
-                [$expense->fund_id]
-            );
+            $fresh = PettyCashFund::find($fundId);
 
-            if ($row) {
-                $newBalance = number_format((float) $row->current_balance + $amount, 2, '.', '');
-
-                DB::update(
-                    'UPDATE petty_cash_funds SET current_balance = ?, updated_at = NOW() WHERE id = ?',
-                    [$newBalance, $row->id]
-                );
+            if ($fresh) {
+                $fresh->current_balance = $this->round((float) $fresh->current_balance + $amount);
+                $fresh->save();
             }
         });
     }
 
     public function createReplenishment(int $fundId, float $amount): void
     {
-        DB::insert(
-            'INSERT INTO replenishment_requests (fund_id, requested_amount, status, triggered_by, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())',
-            [$fundId, number_format($amount, 2, '.', ''), 'pending', 'Manual Request']
-        );
+        ReplenishmentRequest::create([
+            'fund_id' => $fundId,
+            'requested_amount' => $this->round($amount),
+            'status' => 'pending',
+            'triggered_by' => 'Manual Request',
+        ]);
     }
 
     public function updateReplenishment(ReplenishmentRequest $request, array $data): void
     {
         $request->update([
             'fund_id' => $data['fund_id'],
-            'requested_amount' => $data['requested_amount'],
+            'requested_amount' => $this->round((float) $data['requested_amount']),
             'status' => $data['status'],
         ]);
     }
@@ -244,13 +198,13 @@ class PettyCashService
     {
         $request->disburse();
 
-        $pendingRequest = ReplenishmentRequest::where('fund_id', $request->fund_id)
-            ->where('id', '!=', $request->id)
+        $pendingRequest = ReplenishmentRequest::query()
+            ->where('fund_id', $request->fund_id)
             ->where('status', 'pending')
             ->first();
 
-        if (!$pendingRequest) {
-            $request->fund->current_balance = self::FUND_TARGET;
+        if (!$pendingRequest && $request->fund) {
+            $request->fund->current_balance = self::fundTarget();
             $request->fund->status = 'active';
             $request->fund->save();
         }
@@ -259,5 +213,51 @@ class PettyCashService
     public function rejectReplenishment(ReplenishmentRequest $request): void
     {
         $request->reject();
+    }
+
+    private function autoTriggerIfPending(PettyCashFund $fresh, float $newBalance): void
+    {
+        $hasPending = ReplenishmentRequest::query()
+            ->where('fund_id', $fresh->id)
+            ->where('status', 'pending')
+            ->exists();
+
+        if ($hasPending) {
+            return;
+        }
+
+        ReplenishmentRequest::create([
+            'fund_id' => $fresh->id,
+            'requested_amount' => $this->round((float) $fresh->total_amount - $newBalance),
+            'status' => 'pending',
+            'triggered_by' => 'System Auto-Trigger (30% Total Expense Alert - To Liquidate & Replenish)',
+        ]);
+    }
+
+    private function withRowLock(int $fundId, callable $callback): mixed
+    {
+        $lockFile = storage_path('framework/locks/fund-' . $fundId . '.lock');
+
+        if (!is_dir(dirname($lockFile))) {
+            @mkdir(dirname($lockFile), 0777, true);
+        }
+
+        $handle = fopen($lockFile, 'c');
+
+        try {
+            if (!flock($handle, LOCK_EX)) {
+                throw new \RuntimeException('Could not acquire fund lock.');
+            }
+
+            return $callback();
+        } finally {
+            flock($handle, LOCK_UN);
+            fclose($handle);
+        }
+    }
+
+    private function round(float $value): string
+    {
+        return number_format($value, 2, '.', '');
     }
 }

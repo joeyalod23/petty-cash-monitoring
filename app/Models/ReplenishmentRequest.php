@@ -2,21 +2,25 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Services\PettyCashService;
+use App\Support\Sheets\SheetModel;
 
-class ReplenishmentRequest extends Model
+class ReplenishmentRequest extends SheetModel
 {
-    protected $fillable = [
+    protected array $fillable = [
         'fund_id',
         'requested_amount',
         'status',
         'triggered_by',
     ];
 
-    public function fund(): BelongsTo
+    protected array $casts = [
+        'requested_amount' => 'decimal:2',
+    ];
+
+    public function fund(): ?PettyCashFund
     {
-        return $this->belongsTo(PettyCashFund::class, 'fund_id');
+        return PettyCashFund::find($this->fund_id);
     }
 
     public function approve(): void
@@ -29,9 +33,12 @@ class ReplenishmentRequest extends Model
         $this->update(['status' => 'disbursed']);
 
         $fund = $this->fund;
-        $fund->current_balance = 30000.00;
-        $fund->status = 'active';
-        $fund->save();
+
+        if ($fund) {
+            $fund->current_balance = PettyCashService::fundTarget();
+            $fund->status = 'active';
+            $fund->save();
+        }
     }
 
     public function reject(): void

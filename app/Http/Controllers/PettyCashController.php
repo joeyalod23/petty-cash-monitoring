@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Expense;
 use App\Models\PettyCashFund;
 use App\Models\ReplenishmentRequest;
+use App\Rules\SheetExists;
 use App\Services\PettyCashService;
 use Illuminate\Http\Request;
 
@@ -153,7 +154,7 @@ class PettyCashController extends Controller
     public function storeReplenishment(Request $request)
     {
         $validated = $request->validate([
-            'fund_id' => 'required|exists:petty_cash_funds,id',
+            'fund_id' => ['required', new SheetExists('petty_cash_funds'),],
             'requested_amount' => 'required|numeric|min:1',
         ]);
 
@@ -172,7 +173,7 @@ class PettyCashController extends Controller
     public function updateReplenishment(Request $httpRequest, ReplenishmentRequest $request)
     {
         $validated = $httpRequest->validate([
-            'fund_id' => 'required|exists:petty_cash_funds,id',
+            'fund_id' => ['required', new SheetExists('petty_cash_funds'),],
             'requested_amount' => 'required|numeric|min:1',
             'status' => 'required|in:pending,approved,rejected',
         ]);
