@@ -137,7 +137,7 @@
                     $fundTarget = (float) config('pettycash.fund_target', 30000);
                     $totalFundExpenses = $fundTarget - $fund->current_balance;
                     $expensePct = $fundTarget > 0 ? ($totalFundExpenses / $fundTarget) * 100 : 0;
-                    $fillClass = $expensePct > 50 ? 'red' : ($expensePct > 30 ? 'yellow' : 'green');
+                    $fillClass = $expensePct > 50 ? 'red' : ($expensePct > 20 ? 'yellow' : 'green');
                     $statusLabel = match($fund->status) {
                         'active' => 'Active',
                         'low_balance' => 'To Liquidate',
@@ -154,7 +154,7 @@
                     <td>
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
                             <span style="font-size:0.78rem;font-weight:600;color:var(--text-secondary);">{{ number_format($expensePct, 1) }}%</span>
-                            <span style="font-size:0.72rem;color:var(--text-muted);">30% expense threshold</span>
+                            <span style="font-size:0.72rem;color:var(--text-muted);">20% expense threshold</span>
                         </div>
                         <div class="progress-bar">
                             <div class="progress-fill {{ $fillClass }}" style="width:{{ min($expensePct, 100) }}%"></div>

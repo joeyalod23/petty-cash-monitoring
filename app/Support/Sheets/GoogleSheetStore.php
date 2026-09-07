@@ -291,6 +291,213 @@ class GoogleSheetStore implements SheetStore
         $this->drive()->permissions->create($this->spreadsheetId, $permission);
     }
 
+    /**
+     * Protect every configured worksheet so its cells (format included) can
+     * only be changed by the service account and the extra editors given.
+     *
+     * Protected ranges cover the whole grid of each sheet: headers, existing
+     * rows and any row the application appends later.
+     *
+     * @param  array<string, string>  $tables
+     * @param  array<int, string>  $alsoEditors
+     * @return array<string, string> sheet title => result
+     */
+    public function protectSpreadsheet(array $tables, array $alsoEditors = []): array
+    {
+        if (!$this->spreadsheetId) {
+            throw new \RuntimeException('No spreadsheet id configured to protect.');
+        }
+
+        $clientEmail = $this->serviceAccountEmail();
+
+        if ($clientEmail === null) {
+            throw new \RuntimeException('Cannot protect sheets: service account client_email not found in credentials.');
+        }
+
+        $editors = array_values(array_unique(array_filter(array_map('trim', array_merge([$clientEmail], $alsoEditors)))));
+
+        $spreadsheet = $this->sheets->spreadsheets->get($this->spreadsheetId, [
+            'fields' => 'sheets(properties(sheetId,title,gridProperties),protectedRanges)',
+        ]);
+
+        $requests = [];
+        $results = [];
+
+        foreach ($spreadsheet->getSheets() as $sheet) {
+            $title = $sheet->getProperties()->getTitle();
+
+            if (!isset($tables[$title])) {
+                continue;
+            }
+
+            $sheetId = $sheet->getProperties()->getSheetId();
+            $grid = $sheet->getProperties()->getGridProperties();
+            $rowCount = $grid->getRowCount() ?: 1000;
+            $columnCount = $grid->getColumnCount() ?: 30;
+
+            $existing = $sheet->getProtectedRanges() ?? [];
+
+            if ($existing !== []) {
+                $coverage = false;
+
+                foreach ($existing as $protected) {
+                    $range = $protected->getRange();
+
+                    if (
+                        $range
+                        && $range->getStartRowIndex() === 0
+                        && $range->getStartColumnIndex() === 0
+                        && ($range->getEndRowIndex() === null || $range->getEndRowIndex() >= $rowCount)
+                        && ($range->getEndColumnIndex() === null || $range->getEndColumnIndex() >= $columnCount)
+                    ) {
+                        $coverage = true;
+                        break;
+                    }
+                }
+
+                $results[$title] = $coverage ? 'already protected' : 'has protections — unlock first';
+
+                continue;
+            }
+
+            $requests[] = [
+                'addProtectedRange' => [
+                    'protectedRange' => [
+                        'description' => 'Managed by Petty Cash Monitor — do not edit directly',
+                        'range' => [
+                            'sheetId' => $sheetId,
+                            'startRowIndex' => 0,
+                            'endRowIndex' => $rowCount,
+                            'startColumnIndex' => 0,
+                            'endColumnIndex' => $columnCount,
+                        ],
+                        'warningOnly' => false,
+                        'editors' => ['users' => $editors],
+                    ],
+                ],
+            ];
+
+            $results[$title] = 'protected (editors: ' . implode(', ', $editors) . ')';
+        }
+
+        if ($requests !== []) {
+            $batch = new Sheets\BatchUpdateSpreadsheetRequest(['requests' => $requests]);
+            $this->sheets->spreadsheets->batchUpdate($this->spreadsheetId, $batch);
+        }
+
+        return $results;
+    }
+
+    /**
+     * Remove every protected range the application added to the workbook.
+     *
+     * @return array<int, string> descriptions of removed protections
+     */
+    public function unprotectSpreadsheet(): array
+    {
+        if (!$this->spreadsheetId) {
+            throw new \RuntimeException('No spreadsheet id configured to unprotect.');
+        }
+
+        $spreadsheet = $this->sheets->spreadsheets->get($this->spreadsheetId, [
+            'fields' => 'sheets(properties(title),protectedRanges(protectedRangeId,description))',
+        ]);
+
+        $requests = [];
+        $removed = [];
+
+        foreach ($spreadsheet->getSheets() as $sheet) {
+            foreach ($sheet->getProtectedRanges() ?? [] as $protected) {
+                $id = $protected->getProtectedRangeId();
+
+                if ($id === null) {
+                    continue;
+                }
+
+                $removed[] = $sheet->getProperties()->getTitle()
+                    . ' / ' . ($protected->getDescription() ?: 'unnamed protection');
+                $requests[] = [
+                    'deleteProtectedRange' => ['protectedRangeId' => $id],
+                ];
+            }
+        }
+
+        if ($requests !== []) {
+            $batch = new Sheets\BatchUpdateSpreadsheetRequest(['requests' => $requests]);
+            $this->sheets->spreadsheets->batchUpdate($this->spreadsheetId, $batch);
+        }
+
+        return $removed;
+    }
+
+    /**
+     * @return array<int, array{sheet: string, id: int, warningOnly: bool, description: string|null, range: string}>
+     */
+    public function protectedRanges(): array
+    {
+        if (!$this->spreadsheetId) {
+            return [];
+        }
+
+        $spreadsheet = $this->sheets->spreadsheets->get($this->spreadsheetId, [
+            'fields' => 'sheets(properties(title),protectedRanges(protectedRangeId,description,warningOnly,range))',
+        ]);
+
+        $out = [];
+
+        foreach ($spreadsheet->getSheets() as $sheet) {
+            $title = $sheet->getProperties()->getTitle();
+
+            foreach ($sheet->getProtectedRanges() ?? [] as $protected) {
+                $out[] = [
+                    'sheet' => $title,
+                    'id' => $protected->getProtectedRangeId(),
+                    'warningOnly' => $protected->getWarningOnly() ?: false,
+                    'description' => $protected->getDescription(),
+                    'range' => $this->gridRangeLabel($protected->getRange()),
+                ];
+            }
+        }
+
+        return $out;
+    }
+
+    private function serviceAccountEmail(): ?string
+    {
+        $credentials = config('gsheet.application_credentials');
+
+        if (!is_string($credentials) || $credentials === '') {
+            return null;
+        }
+
+        if (str_starts_with(trim($credentials), '{')) {
+            $decoded = json_decode($credentials, true);
+        } elseif (is_file($credentials)) {
+            $decoded = json_decode(file_get_contents($credentials) ?: '', true);
+        } else {
+            return null;
+        }
+
+        return is_array($decoded) && isset($decoded['client_email']) && is_string($decoded['client_email'])
+            ? $decoded['client_email']
+            : null;
+    }
+
+    private function gridRangeLabel(?\Google\Service\Sheets\GridRange $range): string
+    {
+        if ($range === null) {
+            return 'full sheet';
+        }
+
+        $startRow = ($range->getStartRowIndex() ?? 0) + 1;
+        $endRow = $range->getEndRowIndex() ?? 'end';
+        $startCol = ($range->getStartColumnIndex() ?? 0) + 1;
+        $endCol = $range->getEndColumnIndex() ?? 'end';
+
+        return 'R' . $startRow . ':' . ($endRow === 'end' ? 'end' : 'R' . $endRow)
+            . ' C' . $startCol . ':' . ($endCol === 'end' ? 'end' : 'C' . $endCol);
+    }
+
     private function buildClient(): Client
     {
         $client = new Client();

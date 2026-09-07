@@ -15,7 +15,7 @@ class PettyCashService
 
     public static function lowBalanceThreshold(): float
     {
-        return (float) config('pettycash.low_balance_threshold', 0.30);
+        return (float) config('pettycash.low_balance_threshold', 0.20);
     }
 
     public function recordExpense(PettyCashFund $fund, array $data): array
@@ -36,7 +36,7 @@ class PettyCashService
             }
 
             $newBalance = $currentBalance - $expenseAmount;
-            $threshold = $fundTarget * 0.30;
+            $threshold = $fundTarget * 0.20;
             $totalExpenses = $fundTarget - $newBalance;
             $shouldTrigger = $totalExpenses >= $threshold;
 
@@ -132,7 +132,7 @@ class PettyCashService
 
             $fundTarget = self::fundTarget();
             $newBalance = (float) $fresh->current_balance - $diff;
-            $threshold = $fundTarget * 0.30;
+            $threshold = $fundTarget * 0.20;
             $totalExpenses = $fundTarget - $newBalance;
             $shouldTrigger = $totalExpenses >= $threshold;
 
@@ -230,7 +230,7 @@ class PettyCashService
             'fund_id' => $fresh->id,
             'requested_amount' => $this->round((float) $fresh->total_amount - $newBalance),
             'status' => 'pending',
-            'triggered_by' => 'System Auto-Trigger (30% Total Expense Alert - To Liquidate & Replenish)',
+            'triggered_by' => 'System Auto-Trigger (20% Total Expense Alert - To Liquidate & Replenish)',
         ]);
     }
 

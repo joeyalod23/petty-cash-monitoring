@@ -80,7 +80,7 @@ class PettyCashController extends Controller
 
             $message = 'Expense logged successfully.';
             if ($result['alert_triggered']) {
-                $message .= ' Total expenses reached 30% of fund. Redirecting to create replenishment report.';
+                $message .= ' Total expenses reached 20% of fund. Redirecting to create replenishment report.';
                 return redirect()->route('reports.create')
                     ->with('success', $message);
             }

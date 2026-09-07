@@ -3,7 +3,7 @@
     $fundTarget = (float) config('pettycash.fund_target', 30000);
     $totalExpenses = $fundTarget - $fund->current_balance;
     $expensePct = $fundTarget > 0 ? ($totalExpenses / $fundTarget) * 100 : 0;
-    $fillClass = $expensePct > 50 ? 'red' : ($expensePct > 30 ? 'yellow' : 'green');
+    $fillClass = $expensePct > 50 ? 'red' : ($expensePct > 20 ? 'yellow' : 'green');
 @endphp
 
 @section('title', 'Log Expense - Fund #' . $fund->id)
@@ -122,10 +122,10 @@
                         <span style="font-size:0.8rem;font-weight:600;" class="text-mono">₱{{ number_format($totalExpenses, 2) }}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;">
-                        <span style="font-size:0.8rem;color:var(--text-secondary);">30% Expense Threshold</span>
-                        <span style="font-size:0.8rem;font-weight:600;" class="text-mono">₱{{ number_format($fundTarget * 0.30, 2) }}</span>
+                        <span style="font-size:0.8rem;color:var(--text-secondary);">20% Expense Threshold</span>
+                        <span style="font-size:0.8rem;font-weight:600;" class="text-mono">₱{{ number_format($fundTarget * 0.20, 2) }}</span>
                     </div>
-                    @if($totalExpenses >= $fundTarget * 0.30)
+                    @if($totalExpenses >= $fundTarget * 0.20)
                     <div style="margin-top:10px;padding:8px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:0.78rem;color:var(--danger);font-weight:600;text-align:center;">
                         Liquidate & Replenish
                     </div>

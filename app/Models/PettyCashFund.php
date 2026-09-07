@@ -30,7 +30,7 @@ class PettyCashFund extends SheetModel
 
     public function getThresholdAttribute(): float
     {
-        return (float) $this->total_amount * 0.30;
+        return (float) $this->total_amount * 0.20;
     }
 
     public function getBalancePercentageAttribute(): float
